@@ -89,7 +89,6 @@ enum MarkdownLineStyle : LineStyling {
 @objc public protocol FontProperties {
 	var fontName : String? { get set }
 	var color : NSColor { get set }
-    var backgroundColor : NSColor { get set }
 	var fontSize : CGFloat { get set }
 	var fontStyle : FontStyle { get set }
 }
@@ -97,7 +96,6 @@ enum MarkdownLineStyle : LineStyling {
 @objc public protocol FontProperties {
 	var fontName : String? { get set }
 	var color : UIColor { get set }
-    var backgroundColor : UIColor { get set }
 	var fontSize : CGFloat { get set }
 	var fontStyle : FontStyle { get set }
 }
@@ -120,10 +118,8 @@ If that is not set, then the system default will be used.
 	public var fontName : String?
 	#if os(macOS)
 	public var color = NSColor.black
-    public var backgroundColor = NSColor.clear
 	#else
 	public var color = UIColor.black
-    public var backgroundColor = UIColor.clear
 	#endif
 	public var fontSize : CGFloat = 0.0
 	public var fontStyle : FontStyle = .normal
@@ -133,10 +129,8 @@ If that is not set, then the system default will be used.
 	public var fontName : String?
 	#if os(macOS)
 	public var color = NSColor.black
-    public var backgroundColor = NSColor.clear
 	#else
 	public var color = UIColor.black
-    public var backgroundColor = UIColor.clear
 	#endif
 	public var fontSize : CGFloat = 0.0
 	public var fontStyle : FontStyle = .normal
@@ -562,7 +556,8 @@ extension SwiftyMarkdown {
 			attributes[.link] = nil
 			attributes[.strikethroughStyle] = nil
 			attributes[.foregroundColor] = self.color(for: line)
-            attributes[.underlineStyle] = nil
+            attributes[.underlineStyle] = self.underlineStyle(for: line)?.rawValue as AnyObject
+            attributes[.underlineColor] = self.underlineColor(for: line)
             attributes[.backgroundColor] = self.backgroundColor(for: line)
 			guard let styles = token.characterStyles as? [CharacterStyle] else {
 				continue

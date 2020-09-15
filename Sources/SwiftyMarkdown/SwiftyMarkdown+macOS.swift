@@ -142,33 +142,37 @@ extension SwiftyMarkdown {
 		}
 	}
     
-    func backgroundColor( for line : SwiftyLine ) -> NSColor {
+    func backgroundColor( for line : SwiftyLine ) -> NSColor? {
+        // What type are we and is there a font name set?
+        switch line.lineStyle as! MarkdownLineStyle {
+        case .codeblock:
+            return NSColor(red: 245 / 255.0, green: 245 / 255.0, blue: 245 / 255.0, alpha: 1)
+        default:
+            return nil
+        }
+    }
+    
+    func underlineStyle( for line: SwiftyLine) -> NSUnderlineStyle? {
         // What type are we and is there a font name set?
         switch line.lineStyle as! MarkdownLineStyle {
         case .h1, .previousH1:
-            return h1.backgroundColor
+            return NSUnderlineStyle.thick
         case .h2, .previousH2:
-            return h2.backgroundColor
-        case .h3:
-            return h3.backgroundColor
-        case .h4:
-            return h4.backgroundColor
-        case .h5:
-            return h5.backgroundColor
-        case .h6:
-            return h6.backgroundColor
-        case .body:
-            return body.backgroundColor
-        case .codeblock:
-            return code.backgroundColor
-        case .blockquote:
-            return blockquotes.backgroundColor
-        case .unorderedList, .unorderedListIndentFirstOrder, .unorderedListIndentSecondOrder, .orderedList, .orderedListIndentFirstOrder, .orderedListIndentSecondOrder:
-            return body.backgroundColor
-        case .yaml:
-            return body.backgroundColor
-        case .referencedLink:
-            return body.backgroundColor
+            return NSUnderlineStyle.single
+        default:
+            return nil
+        }
+    }
+    
+    func underlineColor( for line: SwiftyLine) -> NSColor? {
+        // What type are we and is there a font name set?
+        switch line.lineStyle as! MarkdownLineStyle {
+        case .h1, .previousH1:
+            return NSColor(red: 224 / 255.0, green: 224 / 255.0, blue: 224 / 255.0, alpha: 1)
+        case .h2, .previousH2:
+            return NSColor(red: 224 / 255.0, green: 224 / 255.0, blue: 224 / 255.0, alpha: 1)
+        default:
+            return nil
         }
     }
 }
