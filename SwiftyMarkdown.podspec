@@ -2,11 +2,11 @@ Pod::Spec.new do |s|
 s.name             = "SwiftyMarkdown"
 s.version          = "1.2.3"
 s.summary          = "Converts Markdown to NSAttributed String"
-s.homepage         = "https://github.com/SimonFairbairn/SwiftyMarkdown"
+s.homepage         = "https://github.com/Eratos1122/SwiftyMarkdown"
 s.license          = 'MIT'
-s.author           = { "Simon Fairbairn" => "simon@voyagetravelapps.com" }
-s.source           = { :git => "https://github.com/SimonFairbairn/SwiftyMarkdown.git", :tag => s.version }
-s.social_media_url = 'https://twitter.com/SimonFairbairn'
+s.author           = { "Anthony Keller" => "eratos1122@gmail.com" }
+s.source           = { :git => "https://github.com/Eratos1122/SwiftyMarkdown.git", :tag => s.version }
+s.social_media_url = 'https://twitter.com/eratos1122'
 
 s.ios.deployment_target = "11.0"
 s.tvos.deployment_target = "11.0"

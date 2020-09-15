@@ -2,8 +2,8 @@
 //  SwiftyMarkdown.swift
 //  SwiftyMarkdown
 //
-//  Created by Simon Fairbairn on 05/03/2016.
-//  Copyright © 2016 Voyage Travel Apps. All rights reserved.
+//  Created by Anthony Keller on 09/15/2020.
+//  Copyright © 2020 Voyage Travel Apps. All rights reserved.
 //
 import os.log
 #if os(macOS)

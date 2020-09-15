@@ -2,14 +2,14 @@
 //  SwiftyScanner.swift
 //  
 //
-//  Created by Simon Fairbairn on 04/04/2020.
+//  Created by Anthony Keller on 09/15/2020.
 //
 
 //
 //  SwiftyScanner.swift
 //  SwiftyMarkdown
 //
-//  Created by Simon Fairbairn on 04/02/2020.
+//  Created by Anthony Keller on 09/15/2020.
 //
 
 import Foundation

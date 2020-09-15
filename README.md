@@ -23,7 +23,7 @@ Support for all of Apple's platforms has been enabled.
 
 ### CocoaPods:
 
-`pod 'SwiftyMarkdown'`
+`pod 'SwiftyMarkdown', :git => 'https://github.com/Eratos1122/SwiftyMarkdown.git'`
 
 ### SPM: 
 
