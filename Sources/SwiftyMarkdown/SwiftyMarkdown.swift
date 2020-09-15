@@ -89,6 +89,7 @@ enum MarkdownLineStyle : LineStyling {
 @objc public protocol FontProperties {
 	var fontName : String? { get set }
 	var color : NSColor { get set }
+    var backgroundColor : NSColor { get set }
 	var fontSize : CGFloat { get set }
 	var fontStyle : FontStyle { get set }
 }
@@ -96,6 +97,7 @@ enum MarkdownLineStyle : LineStyling {
 @objc public protocol FontProperties {
 	var fontName : String? { get set }
 	var color : UIColor { get set }
+    var backgroundColor : UIColor { get set }
 	var fontSize : CGFloat { get set }
 	var fontStyle : FontStyle { get set }
 }

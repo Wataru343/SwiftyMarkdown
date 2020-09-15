@@ -171,6 +171,5 @@ extension SwiftyMarkdown {
             return body.backgroundColor
         }
     }
-	
 }
 #endif
