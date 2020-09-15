@@ -121,7 +121,7 @@ If that is not set, then the system default will be used.
     public var backgroundColor = NSColor.clear
 	#else
 	public var color = UIColor.black
-    public var backgroundColor = NSColor.clear
+    public var backgroundColor = UIColor.clear
 	#endif
 	public var fontSize : CGFloat = 0.0
 	public var fontStyle : FontStyle = .normal
