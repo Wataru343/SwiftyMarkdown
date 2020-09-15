@@ -7,11 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		84E203D625114195005EDAA8 /* SwiftyMarkdown in Frameworks */ = {isa = PBXBuildFile; productRef = 84E203D525114195005EDAA8 /* SwiftyMarkdown */; };
 		F4B4A44C23E4E17400550249 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4B4A44B23E4E17400550249 /* AppDelegate.swift */; };
 		F4B4A44E23E4E17400550249 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4B4A44D23E4E17400550249 /* ViewController.swift */; };
 		F4B4A45023E4E17400550249 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F4B4A44F23E4E17400550249 /* Assets.xcassets */; };
 		F4B4A45323E4E17400550249 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F4B4A45123E4E17400550249 /* Main.storyboard */; };
-		F4B4A46023E4E3DC00550249 /* SwiftyMarkdown in Frameworks */ = {isa = PBXBuildFile; productRef = F4B4A45F23E4E3DC00550249 /* SwiftyMarkdown */; };
 		F4CE98AC1C8AEF7D00D735C1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4CE98AB1C8AEF7D00D735C1 /* AppDelegate.swift */; };
 		F4CE98AE1C8AEF7D00D735C1 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4CE98AD1C8AEF7D00D735C1 /* ViewController.swift */; };
 		F4CE98B11C8AEF7D00D735C1 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F4CE98AF1C8AEF7D00D735C1 /* Main.storyboard */; };
@@ -98,7 +98,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F4B4A46023E4E3DC00550249 /* SwiftyMarkdown in Frameworks */,
+				84E203D625114195005EDAA8 /* SwiftyMarkdown in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -231,7 +231,7 @@
 			);
 			name = SwiftyMarkdownExample;
 			packageProductDependencies = (
-				F4B4A45F23E4E3DC00550249 /* SwiftyMarkdown */,
+				84E203D525114195005EDAA8 /* SwiftyMarkdown */,
 			);
 			productName = SwiftyMarkdownExample;
 			productReference = F4CE98A81C8AEF7D00D735C1 /* SwiftyMarkdownExample.app */;
@@ -314,7 +314,7 @@
 			);
 			mainGroup = F4CE989F1C8AEF7D00D735C1;
 			packageReferences = (
-				F4B4A45E23E4E3DC00550249 /* XCRemoteSwiftPackageReference "SwiftyMarkdown" */,
+				84E203D425114195005EDAA8 /* XCRemoteSwiftPackageReference "SwiftyMarkdown" */,
 			);
 			productRefGroup = F4CE98A91C8AEF7D00D735C1 /* Products */;
 			projectDirPath = "";
@@ -769,20 +769,20 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		F4B4A45E23E4E3DC00550249 /* XCRemoteSwiftPackageReference "SwiftyMarkdown" */ = {
+		84E203D425114195005EDAA8 /* XCRemoteSwiftPackageReference "SwiftyMarkdown" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/SimonFairbairn/SwiftyMarkdown.git";
+			repositoryURL = "https://github.com/Eratos1122/SwiftyMarkdown.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.2;
+				minimumVersion = 1.2.3;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		F4B4A45F23E4E3DC00550249 /* SwiftyMarkdown */ = {
+		84E203D525114195005EDAA8 /* SwiftyMarkdown */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = F4B4A45E23E4E3DC00550249 /* XCRemoteSwiftPackageReference "SwiftyMarkdown" */;
+			package = 84E203D425114195005EDAA8 /* XCRemoteSwiftPackageReference "SwiftyMarkdown" */;
 			productName = SwiftyMarkdown;
 		};
 /* End XCSwiftPackageProductDependency section */

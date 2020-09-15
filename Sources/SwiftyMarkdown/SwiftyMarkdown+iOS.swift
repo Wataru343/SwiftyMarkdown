@@ -174,6 +174,7 @@ extension SwiftyMarkdown {
         // What type are we and is there a font name set?
         switch line.lineStyle as! MarkdownLineStyle {
         case .codeblock:
+        print("1111111asdfasdfaspdfasdfasdfasdfasdfasdfasdfasdfasdf")
             return UIColor(red: 245 / 255.0, green: 245 / 255.0, blue: 245 / 255.0, alpha: 1)
         default:
             return nil
@@ -184,6 +185,7 @@ extension SwiftyMarkdown {
         // What type are we and is there a font name set?
         switch line.lineStyle as! MarkdownLineStyle {
         case .h1, .previousH1:
+            print("22222asdfasdfaspdfasdfasdfasdf")
             return NSUnderlineStyle.thick
         case .h2, .previousH2:
             return NSUnderlineStyle.single
@@ -196,6 +198,7 @@ extension SwiftyMarkdown {
         // What type are we and is there a font name set?
         switch line.lineStyle as! MarkdownLineStyle {
         case .h1, .previousH1:
+        print("234534534534522asdfasdfaspdfasdfasdfasdf")
             return UIColor(red: 224 / 255.0, green: 224 / 255.0, blue: 224 / 255.0, alpha: 1)
         case .h2, .previousH2:
             return UIColor(red: 224 / 255.0, green: 224 / 255.0, blue: 224 / 255.0, alpha: 1)
