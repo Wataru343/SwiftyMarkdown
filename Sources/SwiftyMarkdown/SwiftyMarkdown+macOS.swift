@@ -76,6 +76,9 @@ extension SwiftyMarkdown {
 				fontName = italic.fontName ?? fontName
 				fontSize = italic.fontSize
 				globalItalic = true
+            case .mention:
+                fontName = mention.fontName ?? fontName
+                fontSize = mention.fontSize
 			default:
 				break
 			}
@@ -143,7 +146,6 @@ extension SwiftyMarkdown {
 	}
     
     func backgroundColor( for line : SwiftyLine ) -> NSColor? {
-        // What type are we and is there a font name set?
         switch line.lineStyle as! MarkdownLineStyle {
         case .codeblock:
             return NSColor(red: 245 / 255.0, green: 245 / 255.0, blue: 245 / 255.0, alpha: 1)
@@ -152,20 +154,29 @@ extension SwiftyMarkdown {
         }
     }
     
-    func underlineStyle( for line: SwiftyLine) -> NSUnderlineStyle? {
-        // What type are we and is there a font name set?
+    func backgroundColor( for characterOverride: CharacterStyle ) -> UIColor? {
+        switch characterOverride {
+        case .code:
+            return NSColor(red: 224 / 255.0, green: 224 / 255.0, blue: 224 / 255.0, alpha: 1)
+        case .mention:
+            return NSColor(red: 222 / 255.0, green: 238 / 255.0, blue: 246 / 255.0, alpha: 1)
+        default:
+            return nil
+        }
+    }
+    
+    func underlineStyle( for line: SwiftyLine) -> AnyObject? {
         switch line.lineStyle as! MarkdownLineStyle {
         case .h1, .previousH1:
-            return NSUnderlineStyle.thick
+            return NSUnderlineStyle.thick.rawValue as AnyObject
         case .h2, .previousH2:
-            return NSUnderlineStyle.single
+            return NSUnderlineStyle.single.rawValue as AnyObject
         default:
             return nil
         }
     }
     
     func underlineColor( for line: SwiftyLine) -> NSColor? {
-        // What type are we and is there a font name set?
         switch line.lineStyle as! MarkdownLineStyle {
         case .h1, .previousH1:
             return NSColor(red: 224 / 255.0, green: 224 / 255.0, blue: 224 / 255.0, alpha: 1)

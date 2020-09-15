@@ -102,6 +102,9 @@ extension SwiftyMarkdown {
 			case .strikethrough:
 				fontName = strikethrough.fontName ?? fontName
 				fontSize = strikethrough.fontSize
+            case .mention:
+                fontName = mention.fontName ?? fontName
+                fontSize = mention.fontSize
 			default:
 				break
 			}
@@ -169,36 +172,41 @@ extension SwiftyMarkdown {
 			return link.color
 		}
 	}
-	
+    
     func backgroundColor( for line: SwiftyLine) -> UIColor? {
-        // What type are we and is there a font name set?
         switch line.lineStyle as! MarkdownLineStyle {
         case .codeblock:
-        print("1111111asdfasdfaspdfasdfasdfasdfasdfasdfasdfasdfasdf")
             return UIColor(red: 245 / 255.0, green: 245 / 255.0, blue: 245 / 255.0, alpha: 1)
         default:
             return nil
         }
     }
     
-    func underlineStyle( for line: SwiftyLine) -> NSUnderlineStyle? {
-        // What type are we and is there a font name set?
+    func backgroundColor( for characterOverride: CharacterStyle ) -> UIColor? {
+        switch characterOverride {
+        case .code:
+            return UIColor(red: 224 / 255.0, green: 224 / 255.0, blue: 224 / 255.0, alpha: 1)
+        case .mention:
+            return UIColor(red: 222 / 255.0, green: 238 / 255.0, blue: 246 / 255.0, alpha: 1)
+        default:
+            return nil
+        }
+    }
+    
+    func underlineStyle( for line: SwiftyLine) -> AnyObject? {
         switch line.lineStyle as! MarkdownLineStyle {
         case .h1, .previousH1:
-            print("22222asdfasdfaspdfasdfasdfasdf")
-            return NSUnderlineStyle.thick
+            return NSUnderlineStyle.thick.rawValue as AnyObject
         case .h2, .previousH2:
-            return NSUnderlineStyle.single
+            return NSUnderlineStyle.single.rawValue as AnyObject
         default:
             return nil
         }
     }
     
     func underlineColor( for line: SwiftyLine) -> UIColor? {
-        // What type are we and is there a font name set?
         switch line.lineStyle as! MarkdownLineStyle {
         case .h1, .previousH1:
-        print("234534534534522asdfasdfaspdfasdfasdfasdf")
             return UIColor(red: 224 / 255.0, green: 224 / 255.0, blue: 224 / 255.0, alpha: 1)
         case .h2, .previousH2:
             return UIColor(red: 224 / 255.0, green: 224 / 255.0, blue: 224 / 255.0, alpha: 1)

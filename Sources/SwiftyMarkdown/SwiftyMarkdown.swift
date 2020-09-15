@@ -27,6 +27,8 @@ public enum CharacterStyle : CharacterStyling {
 	case referencedLink
 	case referencedImage
 	case strikethrough
+    case mention
+    case baton
 	
 	public func isEqualTo(_ other: CharacterStyling) -> Bool {
 		guard let other = other as? CharacterStyle else {
@@ -202,7 +204,13 @@ If that is not set, then the system default will be used.
 		CharacterRule(primaryTag: CharacterRuleTag(tag: "`", type: .repeating), otherTags: [], styles: [1 : CharacterStyle.code], shouldCancelRemainingRules: true, balancedTags: true),
 		CharacterRule(primaryTag:CharacterRuleTag(tag: "~", type: .repeating), otherTags : [], styles: [2 : CharacterStyle.strikethrough], minTags:2 , maxTags:2),
 		CharacterRule(primaryTag: CharacterRuleTag(tag: "*", type: .repeating), otherTags: [], styles: [1 : CharacterStyle.italic, 2 : CharacterStyle.bold], minTags:1 , maxTags:2),
-		CharacterRule(primaryTag: CharacterRuleTag(tag: "_", type: .repeating), otherTags: [], styles: [1 : CharacterStyle.italic, 2 : CharacterStyle.bold], minTags:1 , maxTags:2)
+		CharacterRule(primaryTag: CharacterRuleTag(tag: "_", type: .repeating), otherTags: [], styles: [1 : CharacterStyle.italic, 2 : CharacterStyle.bold], minTags:1 , maxTags:2),
+        
+        
+        
+        CharacterRule(primaryTag: CharacterRuleTag(tag: "{{{mention", type: .open), otherTags: [
+            CharacterRuleTag(tag: "}}", type: .close)
+        ], styles: [1 : CharacterStyle.mention]),
 	]
 	
 	let lineProcessor = SwiftyLineProcessor(rules: SwiftyMarkdown.lineRules, defaultRule: MarkdownLineStyle.body, frontMatterRules: SwiftyMarkdown.frontMatterRules)
@@ -243,6 +251,8 @@ If that is not set, then the system default will be used.
 	
 	/// The styles to apply to any code blocks or inline code text found in the Markdown
 	open var code = BasicStyles()
+    
+    open var mention = BasicStyles()
 	
 	open var strikethrough = BasicStyles()
 	
@@ -329,8 +339,8 @@ If that is not set, then the system default will be used.
 		bold.fontSize = size
 		code.fontSize = size
 		link.fontSize = size
-		link.fontSize = size
 		strikethrough.fontSize = size
+        mention.fontSize = size
 	}
 	
 	#if os(macOS)
@@ -348,6 +358,7 @@ If that is not set, then the system default will be used.
 		link.color = color
 		blockquotes.color = color
 		strikethrough.color = color
+        mention.color = color
 	}
 	#else
 	open func setFontColorForAllStyles(with color: UIColor) {
@@ -364,6 +375,7 @@ If that is not set, then the system default will be used.
 		link.color = color
 		blockquotes.color = color
 		strikethrough.color = color
+        mention.color = color
 	}
 	#endif
 	
@@ -381,6 +393,7 @@ If that is not set, then the system default will be used.
 		link.fontName = name
 		blockquotes.fontName = name
 		strikethrough.fontName = name
+        mention.fontName = name
 	}
 	
 	
@@ -556,7 +569,7 @@ extension SwiftyMarkdown {
 			attributes[.link] = nil
 			attributes[.strikethroughStyle] = nil
 			attributes[.foregroundColor] = self.color(for: line)
-            attributes[.underlineStyle] = self.underlineStyle(for: line)?.rawValue as AnyObject
+            attributes[.underlineStyle] = self.underlineStyle(for: line)
             attributes[.underlineColor] = self.underlineColor(for: line)
             attributes[.backgroundColor] = self.backgroundColor(for: line)
 			guard let styles = token.characterStyles as? [CharacterStyle] else {
@@ -611,9 +624,17 @@ extension SwiftyMarkdown {
 			if styles.contains(.code) {
 				attributes[.foregroundColor] = self.code.color
 				attributes[.font] = self.font(for: line, characterOverride: .code)
+                attributes[.backgroundColor] = self.backgroundColor(for: .code)
 			} else {
 				// Switch back to previous font
 			}
+            
+            if styles.contains(.mention) {
+                attributes[.foregroundColor] = self.mention.color
+                attributes[.font] = self.font(for: line, characterOverride: .mention)
+                attributes[.backgroundColor] = self.backgroundColor(for: .mention)
+            }
+            
 			let str = NSAttributedString(string: token.outputString, attributes: attributes)
 			finalAttributedString.append(str)
 		}
