@@ -118,8 +118,10 @@ If that is not set, then the system default will be used.
 	public var fontName : String?
 	#if os(macOS)
 	public var color = NSColor.black
+    public var backgroundColor = NSColor.clear
 	#else
 	public var color = UIColor.black
+    public var backgroundColor = NSColor.clear
 	#endif
 	public var fontSize : CGFloat = 0.0
 	public var fontStyle : FontStyle = .normal
@@ -129,8 +131,10 @@ If that is not set, then the system default will be used.
 	public var fontName : String?
 	#if os(macOS)
 	public var color = NSColor.black
+    public var backgroundColor = NSColor.clear
 	#else
 	public var color = UIColor.black
+    public var backgroundColor = UIColor.clear
 	#endif
 	public var fontSize : CGFloat = 0.0
 	public var fontStyle : FontStyle = .normal
@@ -557,6 +561,7 @@ extension SwiftyMarkdown {
 			attributes[.strikethroughStyle] = nil
 			attributes[.foregroundColor] = self.color(for: line)
             attributes[.underlineStyle] = nil
+            attributes[.backgroundColor] = self.backgroundColor(for: line)
 			guard let styles = token.characterStyles as? [CharacterStyle] else {
 				continue
 			}
