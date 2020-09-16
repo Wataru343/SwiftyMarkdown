@@ -250,6 +250,8 @@ If that is not set, then the system default will be used.
 	open var code = BasicStyles()
     
     open var mention = BasicStyles()
+    
+    open var baton = BasicStyles()
 	
 	open var strikethrough = BasicStyles()
 	
@@ -338,6 +340,7 @@ If that is not set, then the system default will be used.
 		link.fontSize = size
 		strikethrough.fontSize = size
         mention.fontSize = size
+        baton.fontSize = size
 	}
 	
 	#if os(macOS)
@@ -356,6 +359,7 @@ If that is not set, then the system default will be used.
 		blockquotes.color = color
 		strikethrough.color = color
         mention.color = color
+        baton.color = color
 	}
 	#else
 	open func setFontColorForAllStyles(with color: UIColor) {
@@ -373,6 +377,7 @@ If that is not set, then the system default will be used.
 		blockquotes.color = color
 		strikethrough.color = color
         mention.color = color
+        baton.color = color
 	}
 	#endif
 	
@@ -391,6 +396,7 @@ If that is not set, then the system default will be used.
 		blockquotes.fontName = name
 		strikethrough.fontName = name
         mention.fontName = name
+        baton.fontName = name
 	}
 	
 	
@@ -630,6 +636,12 @@ extension SwiftyMarkdown {
                 attributes[.foregroundColor] = self.mention.color
                 attributes[.font] = self.font(for: line, characterOverride: .mention)
                 attributes[.backgroundColor] = self.backgroundColor(for: .mention)
+            }
+            
+            if styles.contains(.baton) {
+                attributes[.foregroundColor] = self.baton.color
+                attributes[.font] = self.font(for: line, characterOverride: .baton)
+                attributes[.backgroundColor] = self.backgroundColor(for: .baton)
             }
             
 			let str = NSAttributedString(string: token.outputString, attributes: attributes)

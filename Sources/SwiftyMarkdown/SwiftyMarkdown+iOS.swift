@@ -105,6 +105,9 @@ extension SwiftyMarkdown {
             case .mention:
                 fontName = mention.fontName ?? fontName
                 fontSize = mention.fontSize
+            case .baton:
+                fontName = baton.fontName ?? fontName
+                fontSize = baton.fontSize
 			default:
 				break
 			}
@@ -187,6 +190,8 @@ extension SwiftyMarkdown {
         case .code:
             return UIColor(red: 224 / 255.0, green: 224 / 255.0, blue: 224 / 255.0, alpha: 1)
         case .mention:
+            return UIColor(red: 222 / 255.0, green: 238 / 255.0, blue: 246 / 255.0, alpha: 1)
+        case .baton:
             return UIColor(red: 222 / 255.0, green: 238 / 255.0, blue: 246 / 255.0, alpha: 1)
         default:
             return nil
