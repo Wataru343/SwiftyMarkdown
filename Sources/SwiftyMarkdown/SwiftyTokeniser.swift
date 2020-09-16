@@ -99,6 +99,17 @@ public class SwiftyTokeniser {
 			guard !string.isEmpty else {
 				return
 			}
+            if let index = lastElement.styles.firstIndex(where: { $0.isEqualTo(CharacterStyle.mention) }), let metadataRange = string.range(of: #"^([0-9]+)"#, options: .regularExpression) {
+                lastElement.metadata.append(String(string[metadataRange]))
+                
+                if let metadataRange = string.range(of: #"^([0-9]+:[0-9]+\})"#, options: .regularExpression) {
+                    lastElement.styles.remove(at: index)
+                    string = "@@" + String(string.suffix(from: metadataRange.upperBound))
+                } else if let metadataRange = string.range(of: #"^([0-9]+\})"#, options: .regularExpression) {
+                    lastElement.styles.removeAll(where: { $0.isEqualTo(CharacterStyle.baton) })
+                    string = "@" + String(string.suffix(from: metadataRange.upperBound))
+                }
+            }
 			var token = Token(type: .string, inputString: string)
 			token.metadataStrings.append(contentsOf: lastElement.metadata) 
 			token.characterStyles = lastElement.styles
