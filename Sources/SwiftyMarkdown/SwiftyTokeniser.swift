@@ -103,10 +103,9 @@ public class SwiftyTokeniser {
                 lastElement.metadata.append(String(string[metadataRange]))
                 
                 if let metadataRange = string.range(of: #"^([0-9]+:[0-9]+\})"#, options: .regularExpression) {
-                    lastElement.styles.remove(at: index)
+                    lastElement.styles[index] = CharacterStyle.baton
                     string = "@@" + String(string.suffix(from: metadataRange.upperBound))
                 } else if let metadataRange = string.range(of: #"^([0-9]+\})"#, options: .regularExpression) {
-                    lastElement.styles.removeAll(where: { $0.isEqualTo(CharacterStyle.baton) })
                     string = "@" + String(string.suffix(from: metadataRange.upperBound))
                 }
             }
