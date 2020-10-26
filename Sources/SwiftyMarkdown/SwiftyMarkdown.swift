@@ -127,6 +127,18 @@ If that is not set, then the system default will be used.
 	public var fontStyle : FontStyle = .normal
 }
 
+@objc open class CodeStyles : NSObject, FontProperties {
+    public var fontName : String?
+    #if os(macOS)
+    public var color = NSColor.black
+    #else
+    public var color = UIColor.black
+    #endif
+    public var fontSize : CGFloat = 0.0
+    public var fontStyle : FontStyle = .normal
+    public var background = UIColor(red: 224 / 255.0, green: 224 / 255.0, blue: 224 / 255.0, alpha: 1)
+}
+
 @objc open class LineStyles : NSObject, FontProperties, LineProperties {
 	public var fontName : String?
 	#if os(macOS)
@@ -247,7 +259,7 @@ If that is not set, then the system default will be used.
 	open var italic = BasicStyles()
 	
 	/// The styles to apply to any code blocks or inline code text found in the Markdown
-	open var code = BasicStyles()
+	open var code = CodeStyles()
     
     open var mention = BasicStyles()
     
