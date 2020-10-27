@@ -584,8 +584,8 @@ extension SwiftyMarkdown {
 			attributes[.link] = nil
 			attributes[.strikethroughStyle] = nil
 			attributes[.foregroundColor] = self.color(for: line)
-            attributes[.underlineStyle] = self.underlineStyle(for: line)
-            attributes[.underlineColor] = self.underlineColor(for: line)
+            //attributes[.underlineStyle] = self.underlineStyle(for: line)
+            //attributes[.underlineColor] = self.underlineColor(for: line)
             attributes[.backgroundColor] = self.backgroundColor(for: line)
 			guard let styles = token.characterStyles as? [CharacterStyle] else {
 				continue
