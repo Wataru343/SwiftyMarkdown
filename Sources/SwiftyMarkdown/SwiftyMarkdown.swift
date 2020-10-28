@@ -417,7 +417,7 @@ If that is not set, then the system default will be used.
 	
 	- returns: An NSAttributedString with the styles applied
 	*/
-	open func attributedString(from markdownString : String? = nil) -> NSAttributedString {
+	open func attributedString(from markdownString : String? = nil) -> NSMutableAttributedString {
 		
 		self.previouslyFoundTokens.removeAll()
 		self.perfomanceLog.start()
@@ -471,7 +471,7 @@ If that is not set, then the system default will be used.
 
 extension SwiftyMarkdown {
 	
-	func attributedStringFor( tokens : [Token], in line : SwiftyLine ) -> NSAttributedString {
+	func attributedStringFor( tokens : [Token], in line : SwiftyLine ) -> NSMutableAttributedString {
 		
 		var finalTokens = tokens
 		let finalAttributedString = NSMutableAttributedString()
