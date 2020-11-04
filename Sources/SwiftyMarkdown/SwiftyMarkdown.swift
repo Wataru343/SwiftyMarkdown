@@ -648,12 +648,14 @@ extension SwiftyMarkdown {
                 attributes[.foregroundColor] = self.mention.color
                 attributes[.font] = self.font(for: line, characterOverride: .mention)
                 attributes[.backgroundColor] = self.backgroundColor(for: .mention)
+                attributes[.link] = NSURL(string: "mention://" + token.metadataStrings[1])
             }
             
             if styles.contains(.baton) {
                 attributes[.foregroundColor] = self.baton.color
                 attributes[.font] = self.font(for: line, characterOverride: .baton)
                 attributes[.backgroundColor] = self.backgroundColor(for: .baton)
+                attributes[.link] = NSURL(string: "baton://" + token.metadataStrings[1])
             }
             
 			let str = NSAttributedString(string: token.outputString, attributes: attributes)
