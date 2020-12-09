@@ -635,33 +635,32 @@ extension SwiftyMarkdown {
 				continue
 			}
 			#endif
-			
+
+            var string = token.outputString
+
 			if styles.contains(.code) {
 				attributes[.foregroundColor] = self.code.color
 				attributes[.font] = self.font(for: line, characterOverride: .code)
                 attributes[.backgroundColor] = self.backgroundColor(for: .code)
-			} else {
-				// Switch back to previous font
-			}
-            
-            if styles.contains(.mention) {
+            } else if styles.contains(.mention) {
                 attributes[.foregroundColor] = self.mention.color
                 attributes[.font] = self.font(for: line, characterOverride: .mention)
                 attributes[.backgroundColor] = self.backgroundColor(for: .mention)
                 attributes[.link] = NSURL(string: "mention://" + token.metadataStrings[1])
-            }
-            
-            if styles.contains(.baton) {
+            } else if styles.contains(.baton) {
                 attributes[.foregroundColor] = self.baton.color
                 attributes[.font] = self.font(for: line, characterOverride: .baton)
                 attributes[.backgroundColor] = self.backgroundColor(for: .baton)
                 attributes[.link] = NSURL(string: "baton://" + token.metadataStrings[1])
+            } else {
+                //Replacing <br>
+                string = string.replacingOccurrences(of: "[^\\S\\n\\r]*<br/?>[^\\S\\n\\r]*", with: "\n", options: .regularExpression, range: string.range(of: string)).trimmingCharacters(in: .whitespaces)
             }
-            
-			let str = NSAttributedString(string: token.outputString, attributes: attributes)
+
+			let str = NSAttributedString(string: string, attributes: attributes)
 			finalAttributedString.append(str)
 		}
-	
+
 		return finalAttributedString
 	}
 }
