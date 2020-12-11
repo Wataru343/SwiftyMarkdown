@@ -664,7 +664,7 @@ extension SwiftyMarkdown {
                 attributes[.backgroundColor] = self.backgroundColor(for: .mentionAll)
             } else {
                 //Replacing <br>
-                string = string.replacingOccurrences(of: "[^\\S\\n\\r]*<br/?>[^\\S\\n\\r]*", with: "\n", options: .regularExpression, range: string.range(of: string)).trimmingCharacters(in: .whitespaces)
+                string = string.replacingOccurrences(of: "[^\\S\\n\\r]*<br/?>[^\\S\\n\\r]*", with: "\n", options: .regularExpression, range: string.range(of: string))
             }
 
 			let str = NSAttributedString(string: string, attributes: attributes)
