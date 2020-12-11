@@ -99,16 +99,23 @@ public class SwiftyTokeniser {
 			guard !string.isEmpty else {
 				return
 			}
-            if let index = lastElement.styles.firstIndex(where: { $0.isEqualTo(CharacterStyle.mention) }), let metadataRange = string.range(of: #"^([0-9]+)"#, options: .regularExpression) {
-                lastElement.metadata.append(String(string[metadataRange]))
-                
-                if let metadataRange = string.range(of: #"^([0-9]+:[0-9]+\})"#, options: .regularExpression) {
-                    lastElement.styles[index] = CharacterStyle.baton
-                    string = "@@" + String(string.suffix(from: metadataRange.upperBound))
-                } else if let metadataRange = string.range(of: #"^([0-9]+\})"#, options: .regularExpression) {
-                    string = "@" + String(string.suffix(from: metadataRange.upperBound))
+            if let index = lastElement.styles.firstIndex(where: { $0.isEqualTo(CharacterStyle.mention) || $0.isEqualTo(CharacterStyle.mentionAll)}) {
+                if let metadataRange = string.range(of: #"^([0-9]+)"#, options: .regularExpression) {
+                    lastElement.metadata.append(String(string[metadataRange]))
+
+                    if let metadataRange = string.range(of: #"^([0-9]+:[0-9]+\})"#, options: .regularExpression) {
+                        lastElement.styles[index] = CharacterStyle.baton
+                        string = "@@" + String(string.suffix(from: metadataRange.upperBound))
+                    } else if let metadataRange = string.range(of: #"^([0-9]+\})"#, options: .regularExpression) {
+                        string = "@" + String(string.suffix(from: metadataRange.upperBound))
+                    }
+                } else if string == "members" {
+                    lastElement.metadata.append("members")
+                    lastElement.styles[index] = CharacterStyle.mentionAll
+                    string = "@!" + string
                 }
             }
+
 			var token = Token(type: .string, inputString: string)
 			token.metadataStrings.append(contentsOf: lastElement.metadata) 
 			token.characterStyles = lastElement.styles

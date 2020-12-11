@@ -29,12 +29,13 @@ public enum CharacterStyle : CharacterStyling {
 	case strikethrough
     case mention
     case baton
-	
+    case mentionAll
+
 	public func isEqualTo(_ other: CharacterStyling) -> Bool {
 		guard let other = other as? CharacterStyle else {
 			return false
 		}
-		return other == self 
+		return other == self
 	}
 }
 
@@ -218,6 +219,9 @@ If that is not set, then the system default will be used.
 		CharacterRule(primaryTag: CharacterRuleTag(tag: "*", type: .repeating), otherTags: [], styles: [1 : CharacterStyle.italic, 2 : CharacterStyle.bold], minTags:1 , maxTags:2),
 		CharacterRule(primaryTag: CharacterRuleTag(tag: "_", type: .repeating), otherTags: [], styles: [1 : CharacterStyle.italic, 2 : CharacterStyle.bold], minTags:1 , maxTags:2),
         CharacterRule(primaryTag: CharacterRuleTag(tag: "{{{mention:", type: .open), otherTags: [
+            CharacterRuleTag(tag: "}}}", type: .close)
+        ], styles: [1 : CharacterStyle.mentionAll]),
+        CharacterRule(primaryTag: CharacterRuleTag(tag: "{{{mention:", type: .open), otherTags: [
             CharacterRuleTag(tag: "}}", type: .close)
         ], styles: [1 : CharacterStyle.mention]),
 	]
@@ -264,7 +268,9 @@ If that is not set, then the system default will be used.
     open var mention = BasicStyles()
     
     open var baton = BasicStyles()
-	
+
+    open var mentionAll = BasicStyles()
+
 	open var strikethrough = BasicStyles()
 	
 	public var bullet : String = "・"
@@ -652,6 +658,10 @@ extension SwiftyMarkdown {
                 attributes[.font] = self.font(for: line, characterOverride: .baton)
                 attributes[.backgroundColor] = self.backgroundColor(for: .baton)
                 attributes[.link] = NSURL(string: "baton://" + token.metadataStrings[1])
+            } else if styles.contains(.mentionAll) {
+                attributes[.foregroundColor] = self.mentionAll.color
+                attributes[.font] = self.font(for: line, characterOverride: .mentionAll)
+                attributes[.backgroundColor] = self.backgroundColor(for: .mentionAll)
             } else {
                 //Replacing <br>
                 string = string.replacingOccurrences(of: "[^\\S\\n\\r]*<br/?>[^\\S\\n\\r]*", with: "\n", options: .regularExpression, range: string.range(of: string)).trimmingCharacters(in: .whitespaces)
