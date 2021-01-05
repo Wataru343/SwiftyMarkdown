@@ -104,10 +104,11 @@ public class SwiftyTokeniser {
                     lastElement.metadata.append(String(string[metadataRange]))
 
                     if let metadataRange = string.range(of: #"^([0-9]+:[0-9]+\})"#, options: .regularExpression) {
-                        lastElement.styles[index] = CharacterStyle.baton
                         string = "@@" + String(string.suffix(from: metadataRange.upperBound))
+                        lastElement.styles[index] = CharacterStyle.baton
                     } else if let metadataRange = string.range(of: #"^([0-9]+\})"#, options: .regularExpression) {
                         string = "@" + String(string.suffix(from: metadataRange.upperBound))
+                        lastElement.styles[index] = CharacterStyle.mention
                     }
                 } else if string == "members" {
                     lastElement.metadata.append("members")
@@ -117,11 +118,19 @@ public class SwiftyTokeniser {
                     lastElement.metadata.append("project")
                     lastElement.styles[index] = CharacterStyle.mentionAll
                     string = "@!" + string
+                } else {
+                    string = "{{{mention:" + string
+                    if lastElement.styles[index] as! CharacterStyle == .mention {
+                        string += "}}"
+                    } else {
+                        string += "}}}"
+                    }
+                    lastElement.styles[index] = CharacterStyle.none
                 }
             }
 
 			var token = Token(type: .string, inputString: string)
-			token.metadataStrings.append(contentsOf: lastElement.metadata) 
+			token.metadataStrings.append(contentsOf: lastElement.metadata)
 			token.characterStyles = lastElement.styles
 			string.removeAll()
 			tokens.append(token)
