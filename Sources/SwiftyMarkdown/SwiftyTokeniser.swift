@@ -113,6 +113,10 @@ public class SwiftyTokeniser {
                     lastElement.metadata.append("members")
                     lastElement.styles[index] = CharacterStyle.mentionAll
                     string = "@!" + string
+                } else if string == "project" {
+                    lastElement.metadata.append("project")
+                    lastElement.styles[index] = CharacterStyle.mentionAll
+                    string = "@!" + string
                 }
             }
 
