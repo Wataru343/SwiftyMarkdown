@@ -181,7 +181,7 @@ public class SwiftyLineProcessor {
 				break
 			}
 		}
-		guard let existentRules = rulesToApply else {
+		guard let existentRules = rulesToApply, strings.count > 1 else {
 			return strings
 		}
 		var outputString = strings
@@ -245,5 +245,3 @@ public class SwiftyLineProcessor {
     }
     
 }
-
-
