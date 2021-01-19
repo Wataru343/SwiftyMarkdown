@@ -1,6 +1,6 @@
 //
 //  SwiftyScanner.swift
-//  
+//
 //
 //  Created by Anthony Keller on 09/15/2020.
 //
@@ -274,8 +274,12 @@ class SwiftyScanner {
 					}
 				}
 			}
-			
+
 			for idx in (openRange.upperBound)...(closeRange.lowerBound) {
+                if styles.contains(where: { $0.isEqualTo(CharacterStyle.code) }) {
+                    styles = [CharacterStyle.code]
+                }
+
 				self.elements[idx].styles.append(contentsOf: styles)
 				self.elements[idx].metadata.append(metadataString)
 				if self.rule.definesBoundary {
@@ -285,6 +289,11 @@ class SwiftyScanner {
 					self.elements[idx].boundaryCount = 1000
 				}
 			}
+
+            for idx in 0...self.elements.prefix(while: { $0.character == self.elements[openRange.upperBound].character && $0.type == .tag }).count {
+                self.elements[openRange.upperBound + idx].characterRuleTagType = .open
+                self.elements[closeRange.lowerBound - idx].characterRuleTagType = .close
+            }
 			
 			if self.rule.isRepeatingTag {
 				let difference = ( openRange.upperBound - openRange.lowerBound ) - (closeRange.upperBound - closeRange.lowerBound)

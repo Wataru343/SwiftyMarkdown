@@ -22,6 +22,7 @@ public enum Cancel {
 }
 
 public enum CharacterRuleTagType {
+    case none
 	case open
 	case close
 	case metadataOpen
@@ -96,6 +97,7 @@ struct Element {
 	var isComplete : Bool = false
 	var styles : [CharacterStyling] = []
 	var metadata : [String] = []
+    var characterRuleTagType : CharacterRuleTagType = .none
 }
 
 extension CharacterSet {
@@ -103,6 +105,3 @@ extension CharacterSet {
         return character.unicodeScalars.allSatisfy(contains(_:))
     }
 }
-
-
-

@@ -95,7 +95,7 @@ public class SwiftyTokeniser {
 		var output : [Token] = []
 		var lastElement = elementArray.first!
 		
-		func empty( _ string : inout String, into tokens : inout [Token] )  {
+		func empty( _ string : inout String, into tokens : inout [Token] ) {
 			guard !string.isEmpty else {
 				return
 			}
@@ -130,25 +130,31 @@ public class SwiftyTokeniser {
             }
 
 			var token = Token(type: .string, inputString: string)
-			token.metadataStrings.append(contentsOf: lastElement.metadata)
+			token.metadataStrings.append(contentsOf: lastElement.metadata) 
 			token.characterStyles = lastElement.styles
 			string.removeAll()
 			tokens.append(token)
+
+            return
 		}
 		
 		var accumulatedString = ""
 		for element in elementArray {
-			guard element.type != .escape else {
-				continue
-			}
-			
-			guard element.type == .string || element.type == .space || element.type == .newline else {
-				empty(&accumulatedString, into: &output)
-				continue
-			}
-			if lastElement.styles as? [CharacterStyle] != element.styles as? [CharacterStyle] {
-				empty(&accumulatedString, into: &output)
-			}
+            let isCode = element.styles.contains(where: { $0.isEqualTo(CharacterStyle.code) })
+            if !isCode || element.character == "`" {
+                guard element.type != .escape else {
+                    continue
+                }
+
+                guard element.type == .string || element.type == .space || element.type == .newline else {
+                    empty(&accumulatedString, into: &output)
+                        continue
+                }
+                if lastElement.styles as? [CharacterStyle] != element.styles as? [CharacterStyle] {
+                    empty(&accumulatedString, into: &output)
+                }
+            }
+
 			accumulatedString.append(element.character)
 			lastElement = element
 		}
