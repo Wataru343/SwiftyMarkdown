@@ -30,6 +30,7 @@ public enum CharacterStyle : CharacterStyling {
     case mention
     case baton
     case mentionAll
+    case keyword
 
 	public func isEqualTo(_ other: CharacterStyling) -> Bool {
 		guard let other = other as? CharacterStyle else {
@@ -224,6 +225,9 @@ If that is not set, then the system default will be used.
         CharacterRule(primaryTag: CharacterRuleTag(tag: "{{{mention:", type: .open), otherTags: [
             CharacterRuleTag(tag: "}}", type: .close)
         ], styles: [1 : CharacterStyle.mention]),
+        CharacterRule(primaryTag: CharacterRuleTag(tag: "<==", type: .open), otherTags: [
+            CharacterRuleTag(tag: "==>", type: .close)
+        ], styles: [1 : CharacterStyle.keyword]),
 	]
 	
 	let lineProcessor = SwiftyLineProcessor(rules: SwiftyMarkdown.lineRules, defaultRule: MarkdownLineStyle.body, frontMatterRules: SwiftyMarkdown.frontMatterRules)
@@ -270,6 +274,8 @@ If that is not set, then the system default will be used.
     open var baton = BasicStyles()
 
     open var mentionAll = BasicStyles()
+
+    open var keyword = BasicStyles()
 
 	open var strikethrough = BasicStyles()
 	
@@ -359,6 +365,7 @@ If that is not set, then the system default will be used.
 		strikethrough.fontSize = size
         mention.fontSize = size
         baton.fontSize = size
+        keyword.fontSize = size
 	}
 	
 	#if os(macOS)
@@ -378,6 +385,7 @@ If that is not set, then the system default will be used.
 		strikethrough.color = color
         mention.color = color
         baton.color = color
+        keyword.color = color
 	}
 	#else
 	open func setFontColorForAllStyles(with color: UIColor) {
@@ -396,6 +404,7 @@ If that is not set, then the system default will be used.
 		strikethrough.color = color
         mention.color = color
         baton.color = color
+        keyword.color = color
 	}
 	#endif
 	
@@ -415,6 +424,7 @@ If that is not set, then the system default will be used.
 		strikethrough.fontName = name
         mention.fontName = name
         baton.fontName = name
+        keyword.fontName = name
 	}
 	
 	
@@ -662,6 +672,14 @@ extension SwiftyMarkdown {
                 attributes[.foregroundColor] = self.mentionAll.color
                 attributes[.font] = self.font(for: line, characterOverride: .mentionAll)
                 attributes[.backgroundColor] = self.backgroundColor(for: .mentionAll)
+            } else if styles.contains(.keyword) {
+                attributes[.foregroundColor] = self.keyword.color
+                //既にあればフォント上書き
+                var fontStyle = CharacterStyle.keyword
+                let s = styles.filter({ $0 != .keyword })
+                if !s.isEmpty { fontStyle = s.first! }
+                attributes[.font] = self.font(for: line, characterOverride: fontStyle)
+                attributes[.backgroundColor] = self.backgroundColor(for: .keyword)
             } else {
                 //Replacing <br>
                 string = string.replacingOccurrences(of: "[^\\S\\n\\r]*<br/?>[^\\S\\n\\r]*", with: "\n", options: .regularExpression, range: string.range(of: string))
