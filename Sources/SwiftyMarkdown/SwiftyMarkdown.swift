@@ -166,73 +166,26 @@ If that is not set, then the system default will be used.
 
 /// A class that takes a [Markdown](https://daringfireball.net/projects/markdown/) string or file and returns an NSAttributedString with the applied styles. Supports Dynamic Type.
 @objc open class SwiftyMarkdown: NSObject {
+    public var frontMatterRules: [FrontMatterRule] = []
+    public var lineRules: [LineRule] = []
+    public var characterRules: [CharacterRule] = []
 	
-	static public var frontMatterRules = [
-		FrontMatterRule(openTag: "---", closeTag: "---", keyValueSeparator: ":")
-	]
-	
-	static public var lineRules = [
-		//LineRule(token: "=", type: MarkdownLineStyle.previousH1, removeFrom: .entireLine, changeAppliesTo: .previous),
-		//LineRule(token: "-", type: MarkdownLineStyle.previousH2, removeFrom: .entireLine, changeAppliesTo: .previous),
-		LineRule(token: "\t\t- ", type: MarkdownLineStyle.unorderedListIndentSecondOrder, removeFrom: .leading, shouldTrim: false),
-		LineRule(token: "\t- ", type: MarkdownLineStyle.unorderedListIndentFirstOrder, removeFrom: .leading, shouldTrim: false),
-		LineRule(token: "- ",type : MarkdownLineStyle.unorderedList, removeFrom: .leading),
-		LineRule(token: "\t\t* ", type: MarkdownLineStyle.unorderedListIndentSecondOrder, removeFrom: .leading, shouldTrim: false),
-		LineRule(token: "\t* ", type: MarkdownLineStyle.unorderedListIndentFirstOrder, removeFrom: .leading, shouldTrim: false),
-		LineRule(token: "\t\t1. ", type: MarkdownLineStyle.orderedListIndentSecondOrder, removeFrom: .leading, shouldTrim: false),
-		LineRule(token: "\t1. ", type: MarkdownLineStyle.orderedListIndentFirstOrder, removeFrom: .leading, shouldTrim: false),
-		LineRule(token: "1. ",type : MarkdownLineStyle.orderedList, removeFrom: .leading),
-		LineRule(token: "* ",type : MarkdownLineStyle.unorderedList, removeFrom: .leading),
-		LineRule(token: "    ", type: MarkdownLineStyle.codeblock, removeFrom: .leading, shouldTrim: false),
-		LineRule(token: "\t", type: MarkdownLineStyle.codeblock, removeFrom: .leading, shouldTrim: false),
-		LineRule(token: ">",type : MarkdownLineStyle.blockquote, removeFrom: .leading),
-		LineRule(token: "###### ",type : MarkdownLineStyle.h6, removeFrom: .both),
-		LineRule(token: "##### ",type : MarkdownLineStyle.h5, removeFrom: .both),
-		LineRule(token: "#### ",type : MarkdownLineStyle.h4, removeFrom: .both),
-		LineRule(token: "### ",type : MarkdownLineStyle.h3, removeFrom: .both),
-		LineRule(token: "## ",type : MarkdownLineStyle.h2, removeFrom: .both),
-		LineRule(token: "# ",type : MarkdownLineStyle.h1, removeFrom: .both)
-	]
-	
-	static public var characterRules = [
-		CharacterRule(primaryTag: CharacterRuleTag(tag: "![", type: .open), otherTags: [
-				CharacterRuleTag(tag: "]", type: .close),
-				CharacterRuleTag(tag: "[", type: .metadataOpen),
-				CharacterRuleTag(tag: "]", type: .metadataClose)
-		], styles: [1 : CharacterStyle.image], metadataLookup: true, definesBoundary: true),
-		CharacterRule(primaryTag: CharacterRuleTag(tag: "![", type: .open), otherTags: [
-				CharacterRuleTag(tag: "]", type: .close),
-				CharacterRuleTag(tag: "(", type: .metadataOpen),
-				CharacterRuleTag(tag: ")", type: .metadataClose)
-		], styles: [1 : CharacterStyle.image], metadataLookup: false, definesBoundary: true),
-		CharacterRule(primaryTag: CharacterRuleTag(tag: "[", type: .open), otherTags: [
-				CharacterRuleTag(tag: "]", type: .close),
-				CharacterRuleTag(tag: "[", type: .metadataOpen),
-				CharacterRuleTag(tag: "]", type: .metadataClose)
-		], styles: [1 : CharacterStyle.link], metadataLookup: true, definesBoundary: true),
-		CharacterRule(primaryTag: CharacterRuleTag(tag: "[", type: .open), otherTags: [
-				CharacterRuleTag(tag: "]", type: .close),
-				CharacterRuleTag(tag: "(", type: .metadataOpen),
-				CharacterRuleTag(tag: ")", type: .metadataClose)
-		], styles: [1 : CharacterStyle.link], metadataLookup: false, definesBoundary: true),
-		CharacterRule(primaryTag: CharacterRuleTag(tag: "`", type: .repeating), otherTags: [], styles: [1 : CharacterStyle.code], shouldCancelRemainingRules: true, balancedTags: true),
-		CharacterRule(primaryTag:CharacterRuleTag(tag: "~", type: .repeating), otherTags : [], styles: [2 : CharacterStyle.strikethrough], minTags:2 , maxTags:2),
-		CharacterRule(primaryTag: CharacterRuleTag(tag: "*", type: .repeating), otherTags: [], styles: [1 : CharacterStyle.italic, 2 : CharacterStyle.bold], minTags:1 , maxTags:2),
-		CharacterRule(primaryTag: CharacterRuleTag(tag: "_", type: .repeating), otherTags: [], styles: [1 : CharacterStyle.italic, 2 : CharacterStyle.bold], minTags:1 , maxTags:2),
-        CharacterRule(primaryTag: CharacterRuleTag(tag: "{{{mention:", type: .open), otherTags: [
-            CharacterRuleTag(tag: "}}}", type: .close)
-        ], styles: [1 : CharacterStyle.mentionAll]),
-        CharacterRule(primaryTag: CharacterRuleTag(tag: "{{{mention:", type: .open), otherTags: [
-            CharacterRuleTag(tag: "}}", type: .close)
-        ], styles: [1 : CharacterStyle.mention]),
-        CharacterRule(primaryTag: CharacterRuleTag(tag: "<==", type: .open), otherTags: [
-            CharacterRuleTag(tag: "==>", type: .close)
-        ], styles: [1 : CharacterStyle.keyword]),
-	]
-	
-	let lineProcessor = SwiftyLineProcessor(rules: SwiftyMarkdown.lineRules, defaultRule: MarkdownLineStyle.body, frontMatterRules: SwiftyMarkdown.frontMatterRules)
-	let tokeniser = SwiftyTokeniser(with: SwiftyMarkdown.characterRules)
-	
+    var lineProcessor: SwiftyLineProcessor!
+    var tokeniser: SwiftyTokeniser!
+
+    open var enableList = true
+    open var enableCodeblock = true
+    open var enableBlockquote = true
+    open var enableHeader = true
+    open var enableImage = true
+    open var enableLink = true
+    open var enableCode = true
+    open var enableStrikethrough = true
+    open var enableBold = true
+    open var enableItalic = true
+    open var enableMention = true
+    open var enableKeyword = true
+
 	/// The styles to apply to any H1 headers found in the Markdown
 	open var h1 = LineStyles()
 	
@@ -311,8 +264,8 @@ If that is not set, then the system default will be used.
 	*/
 	public init(string : String ) {
 		self.string = string
-		super.init()
-		self.setup()
+        super.init()
+        self.setup()
 	}
 	
 	/**
@@ -323,7 +276,6 @@ If that is not set, then the system default will be used.
 	- returns: An initialized SwiftyMarkdown object, or nil if the string couldn't be read
 	*/
 	public init?(url : URL ) {
-		
 		do {
 			self.string = try NSString(contentsOf: url, encoding: String.Encoding.utf8.rawValue) as String
 			
@@ -331,7 +283,7 @@ If that is not set, then the system default will be used.
 			self.string = ""
 			return nil
 		}
-		super.init()
+        super.init()
 		self.setup()
 	}
 	
@@ -343,7 +295,132 @@ If that is not set, then the system default will be used.
 			self.setFontColorForAllStyles(with: .label)
 		}
 		#endif
+        self.setRules()
 	}
+
+    func setRules() {
+        frontMatterRules.removeAll()
+        lineRules.removeAll()
+        characterRules.removeAll()
+
+        frontMatterRules.append(FrontMatterRule(openTag: "---", closeTag: "---", keyValueSeparator: ":"))
+
+        if enableList {
+            lineRules.append(contentsOf: [
+                LineRule(token: "\t\t- ", type: MarkdownLineStyle.unorderedListIndentSecondOrder, removeFrom: .leading, shouldTrim: false),
+                LineRule(token: "\t- ", type: MarkdownLineStyle.unorderedListIndentFirstOrder, removeFrom: .leading, shouldTrim: false),
+                LineRule(token: "- ",type : MarkdownLineStyle.unorderedList, removeFrom: .leading),
+                LineRule(token: "\t\t* ", type: MarkdownLineStyle.unorderedListIndentSecondOrder, removeFrom: .leading, shouldTrim: false),
+                LineRule(token: "\t* ", type: MarkdownLineStyle.unorderedListIndentFirstOrder, removeFrom: .leading, shouldTrim: false),
+                LineRule(token: "\t\t1. ", type: MarkdownLineStyle.orderedListIndentSecondOrder, removeFrom: .leading, shouldTrim: false),
+                LineRule(token: "\t1. ", type: MarkdownLineStyle.orderedListIndentFirstOrder, removeFrom: .leading, shouldTrim: false),
+                LineRule(token: "1. ",type : MarkdownLineStyle.orderedList, removeFrom: .leading),
+                LineRule(token: "* ",type : MarkdownLineStyle.unorderedList, removeFrom: .leading)
+            ])
+        }
+
+        if enableCodeblock {
+            lineRules.append(contentsOf: [
+                LineRule(token: "    ", type: MarkdownLineStyle.codeblock, removeFrom: .leading, shouldTrim: false),
+                LineRule(token: "\t", type: MarkdownLineStyle.codeblock, removeFrom: .leading, shouldTrim: false),
+            ])
+        }
+
+        if enableBlockquote {
+            lineRules.append(contentsOf: [
+                LineRule(token: ">",type : MarkdownLineStyle.blockquote, removeFrom: .leading),
+            ])
+        }
+
+        if enableHeader {
+            lineRules.append(contentsOf: [
+                //LineRule(token: "=", type: MarkdownLineStyle.previousH1, removeFrom: .entireLine, changeAppliesTo: .previous),
+                //LineRule(token: "-", type: MarkdownLineStyle.previousH2, removeFrom: .entireLine, changeAppliesTo: .previous),
+                LineRule(token: "###### ",type : MarkdownLineStyle.h6, removeFrom: .both),
+                LineRule(token: "##### ",type : MarkdownLineStyle.h5, removeFrom: .both),
+                LineRule(token: "#### ",type : MarkdownLineStyle.h4, removeFrom: .both),
+                LineRule(token: "### ",type : MarkdownLineStyle.h3, removeFrom: .both),
+                LineRule(token: "## ",type : MarkdownLineStyle.h2, removeFrom: .both),
+                LineRule(token: "# ",type : MarkdownLineStyle.h1, removeFrom: .both),
+            ])
+        }
+
+        if enableImage {
+            characterRules.append(contentsOf: [
+                CharacterRule(primaryTag: CharacterRuleTag(tag: "![", type: .open), otherTags: [
+                        CharacterRuleTag(tag: "]", type: .close),
+                        CharacterRuleTag(tag: "[", type: .metadataOpen),
+                        CharacterRuleTag(tag: "]", type: .metadataClose)
+                ], styles: [1 : CharacterStyle.image], metadataLookup: true, definesBoundary: true),
+                CharacterRule(primaryTag: CharacterRuleTag(tag: "![", type: .open), otherTags: [
+                        CharacterRuleTag(tag: "]", type: .close),
+                        CharacterRuleTag(tag: "(", type: .metadataOpen),
+                        CharacterRuleTag(tag: ")", type: .metadataClose)
+                ], styles: [1 : CharacterStyle.image], metadataLookup: false, definesBoundary: true),
+            ])
+        }
+
+        if enableLink {
+            characterRules.append(contentsOf: [
+                CharacterRule(primaryTag: CharacterRuleTag(tag: "[", type: .open), otherTags: [
+                        CharacterRuleTag(tag: "]", type: .close),
+                        CharacterRuleTag(tag: "[", type: .metadataOpen),
+                        CharacterRuleTag(tag: "]", type: .metadataClose)
+                ], styles: [1 : CharacterStyle.link], metadataLookup: true, definesBoundary: true),
+                CharacterRule(primaryTag: CharacterRuleTag(tag: "[", type: .open), otherTags: [
+                        CharacterRuleTag(tag: "]", type: .close),
+                        CharacterRuleTag(tag: "(", type: .metadataOpen),
+                        CharacterRuleTag(tag: ")", type: .metadataClose)
+                ], styles: [1 : CharacterStyle.link], metadataLookup: false, definesBoundary: true),
+            ])
+        }
+
+        if enableCode {
+            characterRules.append(contentsOf: [
+                CharacterRule(primaryTag: CharacterRuleTag(tag: "`", type: .repeating), otherTags: [], styles: [1 : CharacterStyle.code], shouldCancelRemainingRules: true, balancedTags: true),
+            ])
+        }
+
+        if enableStrikethrough {
+            characterRules.append(contentsOf: [
+                CharacterRule(primaryTag:CharacterRuleTag(tag: "~", type: .repeating), otherTags : [], styles: [2 : CharacterStyle.strikethrough], minTags:2 , maxTags:2),
+            ])
+        }
+
+        if enableBold {
+            characterRules.append(contentsOf: [
+                CharacterRule(primaryTag: CharacterRuleTag(tag: "*", type: .repeating), otherTags: [], styles: [1 : CharacterStyle.italic, 2 : CharacterStyle.bold], minTags:1 , maxTags:2),
+            ])
+        }
+
+        if enableItalic {
+            characterRules.append(contentsOf: [
+                CharacterRule(primaryTag: CharacterRuleTag(tag: "_", type: .repeating), otherTags: [], styles: [1 : CharacterStyle.italic, 2 : CharacterStyle.bold], minTags:1 , maxTags:2),
+            ])
+        }
+
+        if enableMention {
+            characterRules.append(contentsOf: [
+                CharacterRule(primaryTag: CharacterRuleTag(tag: "{{{mention:", type: .open), otherTags: [
+                    CharacterRuleTag(tag: "}}}", type: .close)
+                ], styles: [1 : CharacterStyle.mentionAll]),
+                CharacterRule(primaryTag: CharacterRuleTag(tag: "{{{mention:", type: .open), otherTags: [
+                    CharacterRuleTag(tag: "}}", type: .close)
+                ], styles: [1 : CharacterStyle.mention]),
+            ])
+        }
+
+        if enableKeyword {
+            characterRules.append(contentsOf: [
+                CharacterRule(primaryTag: CharacterRuleTag(tag: "<==", type: .open), otherTags: [
+                    CharacterRuleTag(tag: "==>", type: .close)
+                ], styles: [1 : CharacterStyle.keyword]),
+            ])
+        }
+
+        lineProcessor = SwiftyLineProcessor(rules: lineRules, defaultRule: MarkdownLineStyle.body, frontMatterRules: frontMatterRules)
+        tokeniser = SwiftyTokeniser(with: characterRules)
+    }
 	
 	/**
 	Set font size for all styles
@@ -434,7 +511,8 @@ If that is not set, then the system default will be used.
 	- returns: An NSAttributedString with the styles applied
 	*/
 	open func attributedString(from markdownString : String? = nil) -> NSMutableAttributedString {
-		
+        self.setup()
+
 		self.previouslyFoundTokens.removeAll()
 		self.perfomanceLog.start()
 		
