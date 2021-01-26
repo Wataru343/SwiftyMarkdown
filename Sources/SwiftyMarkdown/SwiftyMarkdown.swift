@@ -383,7 +383,7 @@ If that is not set, then the system default will be used.
 
         if enableStrikethrough {
             characterRules.append(contentsOf: [
-                CharacterRule(primaryTag:CharacterRuleTag(tag: "~", type: .repeating), otherTags : [], styles: [2 : CharacterStyle.strikethrough], minTags:2 , maxTags:2),
+                CharacterRule(primaryTag:CharacterRuleTag(tag: "~", type: .repeating), otherTags : [], styles: [1 : CharacterStyle.strikethrough], shouldCancelRemainingRules: true, balancedTags: true),
             ])
         }
 
@@ -511,7 +511,7 @@ If that is not set, then the system default will be used.
 	- returns: An NSAttributedString with the styles applied
 	*/
 	open func attributedString(from markdownString : String? = nil) -> NSMutableAttributedString {
-        self.setup()
+        self.setRules()
 
 		self.previouslyFoundTokens.removeAll()
 		self.perfomanceLog.start()
