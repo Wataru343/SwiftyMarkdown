@@ -399,6 +399,14 @@ If that is not set, then the system default will be used.
             ])
         }
 
+        if enableKeyword {
+            characterRules.append(contentsOf: [
+                CharacterRule(primaryTag: CharacterRuleTag(tag: "<==", type: .open), otherTags: [
+                    CharacterRuleTag(tag: "==>", type: .close)
+                ], styles: [1 : CharacterStyle.keyword]),
+            ])
+        }
+
         if enableMention {
             characterRules.append(contentsOf: [
                 CharacterRule(primaryTag: CharacterRuleTag(tag: "{{{mention:", type: .open), otherTags: [
@@ -407,14 +415,6 @@ If that is not set, then the system default will be used.
                 CharacterRule(primaryTag: CharacterRuleTag(tag: "{{{mention:", type: .open), otherTags: [
                     CharacterRuleTag(tag: "}}", type: .close)
                 ], styles: [1 : CharacterStyle.mention]),
-            ])
-        }
-
-        if enableKeyword {
-            characterRules.append(contentsOf: [
-                CharacterRule(primaryTag: CharacterRuleTag(tag: "<==", type: .open), otherTags: [
-                    CharacterRuleTag(tag: "==>", type: .close)
-                ], styles: [1 : CharacterStyle.keyword]),
             ])
         }
 
@@ -750,7 +750,12 @@ extension SwiftyMarkdown {
                 attributes[.foregroundColor] = self.mentionAll.color
                 attributes[.font] = self.font(for: line, characterOverride: .mentionAll)
                 attributes[.backgroundColor] = self.backgroundColor(for: .mentionAll)
-            } else if styles.contains(.keyword) {
+            } else {
+                //Replacing <br>
+                string = string.replacingOccurrences(of: "[^\\S\\n\\r]*<br/?>[^\\S\\n\\r]*", with: "\n", options: .regularExpression, range: string.range(of: string))
+            }
+
+            if styles.contains(.keyword) {
                 attributes[.foregroundColor] = self.keyword.color
                 //既にあればフォント上書き
                 var fontStyle = CharacterStyle.keyword
@@ -758,9 +763,6 @@ extension SwiftyMarkdown {
                 if !s.isEmpty { fontStyle = s.first! }
                 attributes[.font] = self.font(for: line, characterOverride: fontStyle)
                 attributes[.backgroundColor] = self.backgroundColor(for: .keyword)
-            } else {
-                //Replacing <br>
-                string = string.replacingOccurrences(of: "[^\\S\\n\\r]*<br/?>[^\\S\\n\\r]*", with: "\n", options: .regularExpression, range: string.range(of: string))
             }
 
 			let str = NSAttributedString(string: string, attributes: attributes)

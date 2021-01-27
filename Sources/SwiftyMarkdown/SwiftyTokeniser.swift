@@ -99,6 +99,7 @@ public class SwiftyTokeniser {
 			guard !string.isEmpty else {
 				return
 			}
+
             if let index = lastElement.styles.firstIndex(where: { $0.isEqualTo(CharacterStyle.mention) || $0.isEqualTo(CharacterStyle.mentionAll)}) {
                 if let metadataRange = string.range(of: #"^([0-9]+)"#, options: .regularExpression) {
                     lastElement.metadata.append(String(string[metadataRange]))
@@ -118,14 +119,6 @@ public class SwiftyTokeniser {
                     lastElement.metadata.append("project")
                     lastElement.styles[index] = CharacterStyle.mentionAll
                     string = "@!" + string
-                } else {
-                    string = "{{{mention:" + string
-                    if lastElement.styles[index] as! CharacterStyle == .mention {
-                        string += "}}"
-                    } else {
-                        string += "}}}"
-                    }
-                    lastElement.styles[index] = CharacterStyle.none
                 }
             }
 
