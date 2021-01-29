@@ -389,13 +389,13 @@ If that is not set, then the system default will be used.
 
         if enableBold {
             characterRules.append(contentsOf: [
-                CharacterRule(primaryTag: CharacterRuleTag(tag: "*", type: .repeating), otherTags: [], styles: [1 : CharacterStyle.italic, 2 : CharacterStyle.bold], minTags:1 , maxTags:2),
+                CharacterRule(primaryTag:CharacterRuleTag(tag: "*", type: .repeating), otherTags : [], styles: [1 : CharacterStyle.bold], shouldCancelRemainingRules: true, balancedTags: true),
             ])
         }
 
         if enableItalic {
             characterRules.append(contentsOf: [
-                CharacterRule(primaryTag: CharacterRuleTag(tag: "_", type: .repeating), otherTags: [], styles: [1 : CharacterStyle.italic, 2 : CharacterStyle.bold], minTags:1 , maxTags:2),
+                CharacterRule(primaryTag:CharacterRuleTag(tag: "_", type: .repeating), otherTags : [], styles: [1 : CharacterStyle.italic], shouldCancelRemainingRules: true, balancedTags: true),
             ])
         }
 
