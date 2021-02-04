@@ -752,7 +752,27 @@ extension SwiftyMarkdown {
                 attributes[.backgroundColor] = self.backgroundColor(for: .mentionAll)
             } else {
                 //Replacing <br>
-                string = string.replacingOccurrences(of: "[^\\S\\n\\r]*<br/?>[^\\S\\n\\r]*", with: "\n", options: .regularExpression, range: string.range(of: string))
+                //string = string.replacingOccurrences(of: "[^\\S\\n\\r]*<br/?>[^\\S\\n\\r]*", with: "\n", options: .regularExpression, range: string.range(of: string))
+
+                let patterns = [("[^\\S\\n\\r]*(\\\\*)(<br/?>)[^\\S\\n\\r]*", "\n"),
+                                ("[^\\S\\n\\r]*(\\\\*)(&nbsp;)[^\\S\\n\\r]*", "\u{0020}"),
+                                ("[^\\S\\n\\r]*(\\\\*)(&ensp;)[^\\S\\n\\r]*", "\u{2002}"),
+                                ("[^\\S\\n\\r]*(\\\\*)(&emsp;)[^\\S\\n\\r]*", "\u{2003}"),
+                                ("[^\\S\\n\\r]*(\\\\*)(&thinsp;)[^\\S\\n\\r]*", "\u{2009}"),
+                                ("[^\\S\\n\\r]*(\\\\*)(\\\\)[^\\S\\n\\r]*", "\n")]
+
+                for pattern in patterns {
+                    guard let regex = try? NSRegularExpression(pattern: pattern.0) else { continue }
+
+                    for match in regex.matches(in: string, range: NSRange(location: 0, length: string.count)).reversed() {
+                        let backSlash = string[Range(match.range(at: 1), in: string)!]
+                        if backSlash.count == 1 {
+                            string.replaceSubrange(Range(match.range(at: 1), in: string)!, with: "")
+                        } else if backSlash.count % 2 == 0 {
+                            string.replaceSubrange(Range(match.range(at: 2), in: string)!, with: pattern.1)
+                        }
+                    }
+                }
             }
 
             if styles.contains(.keyword) {
