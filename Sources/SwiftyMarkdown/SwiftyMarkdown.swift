@@ -69,7 +69,9 @@ enum MarkdownLineStyle : LineStyling {
 	case orderedListIndentFirstOrder
 	case orderedListIndentSecondOrder
 	case referencedLink
-	
+    case checkBoxWithCheck
+    case checkBoxEmpty
+
     func styleIfFoundStyleAffectsPreviousLine() -> LineStyling? {
         switch self {
         case .previousH1:
@@ -307,6 +309,8 @@ If that is not set, then the system default will be used.
 
         if enableList {
             lineRules.append(contentsOf: [
+                //LineRule(token: "- [ ] ",type : MarkdownLineStyle.checkBoxEmpty, removeFrom: .leading),
+                //LineRule(token: "- [x] ",type : MarkdownLineStyle.checkBoxWithCheck, removeFrom: .leading),
                 LineRule(token: "\t\t- ", type: MarkdownLineStyle.unorderedListIndentSecondOrder, removeFrom: .leading, shouldTrim: false),
                 LineRule(token: "\t- ", type: MarkdownLineStyle.unorderedListIndentFirstOrder, removeFrom: .leading, shouldTrim: false),
                 LineRule(token: "- ",type : MarkdownLineStyle.unorderedList, removeFrom: .leading),
@@ -315,7 +319,7 @@ If that is not set, then the system default will be used.
                 LineRule(token: "\t\t1. ", type: MarkdownLineStyle.orderedListIndentSecondOrder, removeFrom: .leading, shouldTrim: false),
                 LineRule(token: "\t1. ", type: MarkdownLineStyle.orderedListIndentFirstOrder, removeFrom: .leading, shouldTrim: false),
                 LineRule(token: "1. ",type : MarkdownLineStyle.orderedList, removeFrom: .leading),
-                LineRule(token: "* ",type : MarkdownLineStyle.unorderedList, removeFrom: .leading)
+                LineRule(token: "* ",type : MarkdownLineStyle.unorderedList, removeFrom: .leading),
             ])
         }
 
@@ -662,8 +666,14 @@ extension SwiftyMarkdown {
 			lineProperties = body
 		case .referencedLink:
 			lineProperties = body
-		}
-		
+        case .checkBoxWithCheck:
+            lineProperties = body
+            finalTokens.insert(Token(type: .string, inputString: "✔️  "), at: 0)
+        case .checkBoxEmpty:
+            lineProperties = body
+            finalTokens.insert(Token(type: .string, inputString: "▢  "), at: 0)
+        }
+
         let paragraphStyle = attributes[.paragraphStyle] as? NSMutableParagraphStyle ?? NSMutableParagraphStyle()
 		if lineProperties.alignment != .left {
 			paragraphStyle.alignment = lineProperties.alignment
@@ -751,25 +761,24 @@ extension SwiftyMarkdown {
                 attributes[.font] = self.font(for: line, characterOverride: .mentionAll)
                 attributes[.backgroundColor] = self.backgroundColor(for: .mentionAll)
             } else {
-                //Replacing <br>
-                //string = string.replacingOccurrences(of: "[^\\S\\n\\r]*<br/?>[^\\S\\n\\r]*", with: "\n", options: .regularExpression, range: string.range(of: string))
-
-                let patterns = [("[^\\S\\n\\r]*(\\\\*)(<br/?>)[^\\S\\n\\r]*", "\n"),
-                                ("[^\\S\\n\\r]*(\\\\*)(&nbsp;)[^\\S\\n\\r]*", "\u{0020}"),
-                                ("[^\\S\\n\\r]*(\\\\*)(&ensp;)[^\\S\\n\\r]*", "\u{2002}"),
-                                ("[^\\S\\n\\r]*(\\\\*)(&emsp;)[^\\S\\n\\r]*", "\u{2003}"),
-                                ("[^\\S\\n\\r]*(\\\\*)(&thinsp;)[^\\S\\n\\r]*", "\u{2009}"),
-                                ("[^\\S\\n\\r]*(\\\\*)(\\\\)[^\\S\\n\\r]*", "\n")]
+                //Replacing <br> & WhiteSpace
+                let patterns = [(pattern: #"[^\S\n\r]*(\\*)(<br/?>)[^\S\n\r]*"#, replace: "\n", removeSingleEscape: true),
+                                (pattern: #"[^\S\n\r]*(\\*)(&nbsp;)[^\S\n\r]*"#, replace: "\u{0020}", removeSingleEscape: true),
+                                (pattern: #"[^\S\n\r]*(\\*)(&ensp;)[^\S\n\r]*"#, replace: "\u{2002}", removeSingleEscape: true),
+                                (pattern: #"[^\S\n\r]*(\\*)(&emsp;)[^\S\n\r]*"#, replace: "\u{2003}", removeSingleEscape: true),
+                                (pattern: #"[^\S\n\r]*(\\*)(&thinsp;)[^\S\n\r]*"#, replace: "\u{2009}", removeSingleEscape: true),
+                                (pattern: #"[^\S\n\r]*(\\*)(\\)[^\S\n\r]*"#, replace: "", removeSingleEscape: false)]
 
                 for pattern in patterns {
-                    guard let regex = try? NSRegularExpression(pattern: pattern.0) else { continue }
+                    guard let regex = try? NSRegularExpression(pattern: pattern.pattern) else { continue }
 
                     for match in regex.matches(in: string, range: NSRange(location: 0, length: string.count)).reversed() {
                         let backSlash = string[Range(match.range(at: 1), in: string)!]
-                        if backSlash.count == 1 {
+                        if backSlash.count == 0 && !pattern.removeSingleEscape {
+                        } else if backSlash.count == 1 {
                             string.replaceSubrange(Range(match.range(at: 1), in: string)!, with: "")
                         } else if backSlash.count % 2 == 0 {
-                            string.replaceSubrange(Range(match.range(at: 2), in: string)!, with: pattern.1)
+                            string.replaceSubrange(Range(match.range(at: 2), in: string)!, with: pattern.replace)
                         }
                     }
                 }

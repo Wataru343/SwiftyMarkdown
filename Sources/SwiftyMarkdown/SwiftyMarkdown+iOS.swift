@@ -179,9 +179,13 @@ extension SwiftyMarkdown {
 			return body.color
 		case .referencedLink:
 			return link.color
-		}
+        case .checkBoxWithCheck:
+            return body.color
+        case .checkBoxEmpty:
+            return body.color
+        }
 	}
-    
+
     func backgroundColor( for line: SwiftyLine) -> UIColor? {
         switch line.lineStyle as! MarkdownLineStyle {
         case .codeblock:
