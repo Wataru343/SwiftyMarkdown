@@ -59,13 +59,15 @@ public struct LineRule {
     let type : LineStyling
     let shouldTrim : Bool
     let changeAppliesTo : ChangeApplication
-    
-    public init(token : String, type : LineStyling, removeFrom : Remove = .leading, shouldTrim : Bool = true, changeAppliesTo : ChangeApplication = .current ) {
+    let useRegex: Bool
+
+    public init(token : String, type : LineStyling, removeFrom : Remove = .leading, shouldTrim : Bool = true, changeAppliesTo : ChangeApplication = .current, useRegex: Bool = false ) {
         self.token = token
         self.type = type
         self.removeFrom = removeFrom
         self.shouldTrim = shouldTrim
         self.changeAppliesTo = changeAppliesTo
+        self.useRegex = useRegex
     }
 }
 
@@ -90,22 +92,38 @@ public class SwiftyLineProcessor {
     
     func findLeadingLineElement( _ element : LineRule, in string : String ) -> String {
         var output = string
+
+        if element.useRegex {
+            if let range = output.range(of: "^\(element.token)", options: .regularExpression) {
+                output.removeSubrange(range)
+                return output
+            }
+        }
+
         if let range = output.index(output.startIndex, offsetBy: element.token.count, limitedBy: output.endIndex), output[output.startIndex..<range] == element.token {
             output.removeSubrange(output.startIndex..<range)
             return output
         }
-        return output
+        return ""
     }
     
     func findTrailingLineElement( _ element : LineRule, in string : String ) -> String {
         var output = string
+
+        if element.useRegex {
+            if let range = output.range(of: "\(element.token)$", options: .regularExpression) {
+                output.removeSubrange(range)
+                return output
+            }
+        }
+
         let token = element.token.trimmingCharacters(in: .whitespaces)
         if let range = output.index(output.endIndex, offsetBy: -(token.count), limitedBy: output.startIndex), output[range..<output.endIndex] == token {
             output.removeSubrange(range..<output.endIndex)
             return output
             
         }
-        return output
+        return ""
     }
     
     func processLineLevelAttributes( _ text : String ) -> SwiftyLine? {
@@ -124,11 +142,7 @@ public class SwiftyLineProcessor {
 			if let hasToken = self.closeToken, unprocessed != hasToken {
 				return nil
 			}
-            
-			if !text.contains(element.token) {
-				continue
-			}
-			
+
             switch element.removeFrom {
             case .leading:
                 output = findLeadingLineElement(element, in: output)
@@ -143,6 +157,11 @@ public class SwiftyLineProcessor {
             default:
                 break
             }
+
+            if output.count == 0 {
+                continue
+            }
+
             // Only if the output has changed in some way
             guard unprocessed != output else {
                 continue

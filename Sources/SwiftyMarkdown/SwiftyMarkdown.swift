@@ -318,7 +318,7 @@ If that is not set, then the system default will be used.
                 LineRule(token: "\t* ", type: MarkdownLineStyle.unorderedListIndentFirstOrder, removeFrom: .leading, shouldTrim: false),
                 LineRule(token: "\t\t1. ", type: MarkdownLineStyle.orderedListIndentSecondOrder, removeFrom: .leading, shouldTrim: false),
                 LineRule(token: "\t1. ", type: MarkdownLineStyle.orderedListIndentFirstOrder, removeFrom: .leading, shouldTrim: false),
-                LineRule(token: "1. ",type : MarkdownLineStyle.orderedList, removeFrom: .leading),
+                LineRule(token: "\\d+\\. ",type : MarkdownLineStyle.orderedList, removeFrom: .leading, useRegex: true),
                 LineRule(token: "* ",type : MarkdownLineStyle.unorderedList, removeFrom: .leading),
             ])
         }
@@ -585,7 +585,8 @@ extension SwiftyMarkdown {
 			self.orderedListCount += 1
 			self.orderedListIndentFirstOrderCount = 0
 			self.orderedListIndentSecondOrderCount = 0
-			listItem = "\(self.orderedListCount)."
+            listItem = "\(String(self.orderedListCount).suffix(2))."
+            listItem = repeatElement(" ", count: 3 - listItem.count) + listItem
 		case .orderedListIndentFirstOrder, .unorderedListIndentFirstOrder:
 			self.orderedListIndentFirstOrderCount += 1
 			self.orderedListIndentSecondOrderCount = 0
@@ -654,8 +655,8 @@ extension SwiftyMarkdown {
 			paragraphStyle.headIndent = addition
 
 			attributes[.paragraphStyle] = paragraphStyle
-			finalTokens.insert(Token(type: .string, inputString: "\(indent)\(listItem)\t"), at: 0)
-			
+			finalTokens.insert(Token(type: .string, inputString: "\(indent)\(listItem) "), at: 0)
+
 		case .yaml:
 			lineProperties = body
 		case .previousH1:
