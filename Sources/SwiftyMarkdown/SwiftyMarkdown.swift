@@ -313,13 +313,13 @@ If that is not set, then the system default will be used.
                 //LineRule(token: "- [x] ",type : MarkdownLineStyle.checkBoxWithCheck, removeFrom: .leading),
                 LineRule(token: "\t\t- ", type: MarkdownLineStyle.unorderedListIndentSecondOrder, removeFrom: .leading, shouldTrim: false),
                 LineRule(token: "\t- ", type: MarkdownLineStyle.unorderedListIndentFirstOrder, removeFrom: .leading, shouldTrim: false),
-                LineRule(token: "- ",type : MarkdownLineStyle.unorderedList, removeFrom: .leading),
+                LineRule(token: "- ", otherTokens: ["-"] ,type: MarkdownLineStyle.unorderedList, removeFrom: .leading),
                 LineRule(token: "\t\t* ", type: MarkdownLineStyle.unorderedListIndentSecondOrder, removeFrom: .leading, shouldTrim: false),
                 LineRule(token: "\t* ", type: MarkdownLineStyle.unorderedListIndentFirstOrder, removeFrom: .leading, shouldTrim: false),
                 LineRule(token: "\t\t1. ", type: MarkdownLineStyle.orderedListIndentSecondOrder, removeFrom: .leading, shouldTrim: false),
                 LineRule(token: "\t1. ", type: MarkdownLineStyle.orderedListIndentFirstOrder, removeFrom: .leading, shouldTrim: false),
                 LineRule(token: "\\d+\\. ",type : MarkdownLineStyle.orderedList, removeFrom: .leading, useRegex: true),
-                LineRule(token: "* ",type : MarkdownLineStyle.unorderedList, removeFrom: .leading),
+                LineRule(token: "* ", otherTokens: ["*"], type : MarkdownLineStyle.unorderedList, removeFrom: .leading),
             ])
         }
 

@@ -55,14 +55,16 @@ public struct FrontMatterRule {
 
 public struct LineRule {
     let token : String
+    let otherTokens : [String]
     let removeFrom : Remove
     let type : LineStyling
     let shouldTrim : Bool
     let changeAppliesTo : ChangeApplication
     let useRegex: Bool
 
-    public init(token : String, type : LineStyling, removeFrom : Remove = .leading, shouldTrim : Bool = true, changeAppliesTo : ChangeApplication = .current, useRegex: Bool = false ) {
+    public init(token : String, otherTokens : [String] = [], type : LineStyling, removeFrom : Remove = .leading, shouldTrim : Bool = true, changeAppliesTo : ChangeApplication = .current, useRegex: Bool = false ) {
         self.token = token
+        self.otherTokens = otherTokens
         self.type = type
         self.removeFrom = removeFrom
         self.shouldTrim = shouldTrim
@@ -90,21 +92,25 @@ public class SwiftyLineProcessor {
 		self.frontMatterRules = frontMatterRules
     }
     
-    func findLeadingLineElement( _ element : LineRule, in string : String ) -> String {
+    func findLeadingLineElement( _ element : LineRule, in string : String , prevStyle: SwiftyLine?) -> String? {
         var output = string
 
-        if element.useRegex {
-            if let range = output.range(of: "^\(element.token)", options: .regularExpression) {
-                output.removeSubrange(range)
+        var tokens = [element.token]
+        tokens.append(contentsOf: element.otherTokens)
+
+        for token in tokens {
+            if element.useRegex {
+                if let range = output.range(of: "^\(token)", options: .regularExpression) {
+                    output.removeSubrange(range)
+                    return output
+                }
+            } else if let range = output.index(output.startIndex, offsetBy: token.count, limitedBy: output.endIndex), output[output.startIndex..<range] == token {
+                output.removeSubrange(output.startIndex..<range)
                 return output
             }
         }
 
-        if let range = output.index(output.startIndex, offsetBy: element.token.count, limitedBy: output.endIndex), output[output.startIndex..<range] == element.token {
-            output.removeSubrange(output.startIndex..<range)
-            return output
-        }
-        return ""
+        return nil
     }
     
     func findTrailingLineElement( _ element : LineRule, in string : String ) -> String {
@@ -126,17 +132,18 @@ public class SwiftyLineProcessor {
         return ""
     }
     
-    func processLineLevelAttributes( _ text : String ) -> SwiftyLine? {
+    func processLineLevelAttributes( _ text : String, prevStyle: SwiftyLine?) -> SwiftyLine? {
         if text.isEmpty, let style = processEmptyStrings {
             return SwiftyLine(line: "", lineStyle: style)
         }
+
         let previousLines = lineRules.filter({ $0.changeAppliesTo == .previous })
 
         for element in lineRules {
             guard element.token.count > 0 else {
                 continue
             }
-            var output : String = (element.shouldTrim) ? text.trimmingCharacters(in: .whitespaces) : text
+            var output : String? = (element.shouldTrim) ? text.trimmingCharacters(in: .whitespaces) : text
             let unprocessed = output
 			
 			if let hasToken = self.closeToken, unprocessed != hasToken {
@@ -145,25 +152,25 @@ public class SwiftyLineProcessor {
 
             switch element.removeFrom {
             case .leading:
-                output = findLeadingLineElement(element, in: output)
-            case .trailing:
-                output = findTrailingLineElement(element, in: output)
+                output = findLeadingLineElement(element, in: output!, prevStyle: prevStyle)
+            /*case .trailing:
+                output = findTrailingLineElement(element, in: output!)
             case .both:
-                output = findLeadingLineElement(element, in: output)
-                output = findTrailingLineElement(element, in: output)
+                output = findLeadingLineElement(element, in: output!, prevStyle: prevStyle)
+                output = findTrailingLineElement(element, in: output!)
 			case .entireLine:
-				let maybeOutput = output.replacingOccurrences(of: element.token, with: "")
-				output = ( maybeOutput.isEmpty ) ? maybeOutput : output
+				let maybeOutput = output!.replacingOccurrences(of: element.token, with: "")
+				output = ( maybeOutput.isEmpty ) ? maybeOutput : output*/
             default:
                 break
             }
 
-            if output.count == 0 {
+            guard var out = output else {
                 continue
             }
 
             // Only if the output has changed in some way
-            guard unprocessed != output else {
+            guard unprocessed != out else {
                 continue
             }
 			if element.changeAppliesTo == .untilClose {
@@ -173,8 +180,8 @@ public class SwiftyLineProcessor {
 
 			
 			
-            output = (element.shouldTrim) ? output.trimmingCharacters(in: .whitespaces) : output
-            return SwiftyLine(line: output, lineStyle: element.type)
+            out = (element.shouldTrim) ? out.trimmingCharacters(in: .whitespaces) : out
+            return SwiftyLine(line: out, lineStyle: element.type)
             
         }
         
@@ -237,17 +244,19 @@ public class SwiftyLineProcessor {
 		lines = self.processFrontMatter(lines)
 		
 		self.perfomanceLog.tag(with: "(Front matter completed)")
-		
 
-        for  heading in lines {
+        var prevStyle: SwiftyLine? = nil
+        for heading in lines {
             
             if processEmptyStrings == nil && heading.isEmpty {
                 continue
             }
 			            
-			guard let input = processLineLevelAttributes(String(heading)) else {
+            guard let input = processLineLevelAttributes(String(heading), prevStyle: prevStyle) else {
 				continue
 			}
+
+            prevStyle = input
 			
             if let existentPrevious = input.lineStyle.styleIfFoundStyleAffectsPreviousLine(), foundAttributes.count > 0 {
                 if let idx = foundAttributes.firstIndex(of: foundAttributes.last!) {
