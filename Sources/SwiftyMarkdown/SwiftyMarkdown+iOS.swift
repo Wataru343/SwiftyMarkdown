@@ -175,7 +175,7 @@ extension SwiftyMarkdown {
 			return code.color
 		case .blockquote:
 			return blockquotes.color
-		case .unorderedList, .unorderedListIndentFirstOrder, .unorderedListIndentSecondOrder, .orderedList, .orderedListIndentFirstOrder, .orderedListIndentSecondOrder:
+        case .unorderedList, .orderedList, .unorderedListIndent, .orderedListIndent:
 			return body.color
 		case .referencedLink:
 			return link.color

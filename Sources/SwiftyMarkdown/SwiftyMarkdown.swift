@@ -63,11 +63,9 @@ enum MarkdownLineStyle : LineStyling {
     case blockquote
     case codeblock
     case unorderedList
-	case unorderedListIndentFirstOrder
-	case unorderedListIndentSecondOrder
+	case unorderedListIndent
     case orderedList
-	case orderedListIndentFirstOrder
-	case orderedListIndentSecondOrder
+	case orderedListIndent
 	case referencedLink
     case checkBoxWithCheck
     case checkBoxEmpty
@@ -311,15 +309,21 @@ If that is not set, then the system default will be used.
             lineRules.append(contentsOf: [
                 //LineRule(token: "- [ ] ",type : MarkdownLineStyle.checkBoxEmpty, removeFrom: .leading),
                 //LineRule(token: "- [x] ",type : MarkdownLineStyle.checkBoxWithCheck, removeFrom: .leading),
-                LineRule(token: "\t\t- ", type: MarkdownLineStyle.unorderedListIndentSecondOrder, removeFrom: .leading, shouldTrim: false),
-                LineRule(token: "\t- ", type: MarkdownLineStyle.unorderedListIndentFirstOrder, removeFrom: .leading, shouldTrim: false),
-                LineRule(token: "- ", otherTokens: ["-"] ,type: MarkdownLineStyle.unorderedList, removeFrom: .leading),
-                LineRule(token: "\t\t* ", type: MarkdownLineStyle.unorderedListIndentSecondOrder, removeFrom: .leading, shouldTrim: false),
-                LineRule(token: "\t* ", type: MarkdownLineStyle.unorderedListIndentFirstOrder, removeFrom: .leading, shouldTrim: false),
-                LineRule(token: "\t\t1. ", type: MarkdownLineStyle.orderedListIndentSecondOrder, removeFrom: .leading, shouldTrim: false),
-                LineRule(token: "\t1. ", type: MarkdownLineStyle.orderedListIndentFirstOrder, removeFrom: .leading, shouldTrim: false),
+                LineRule(token: "", type: MarkdownLineStyle.unorderedListIndent, removeFrom: .leading, shouldTrim: false , finder: ({
+                    guard let range = $0.range(of: "^\\s*-\\s", options: .regularExpression) else { return nil }
+                    return range
+                })),
+                LineRule(token: "", type: MarkdownLineStyle.unorderedListIndent, removeFrom: .leading, shouldTrim: false , finder: ({
+                    guard let range = $0.range(of: "^\\s*\\*\\s", options: .regularExpression) else { return nil }
+                    return range
+                })),
+                LineRule(token: "", type: MarkdownLineStyle.orderedListIndent, removeFrom: .leading, shouldTrim: false , finder: ({
+                    guard let range = $0.range(of: "^\\s*\\d+\\.\\s", options: .regularExpression) else { return nil }
+                    return range
+                })),
+                LineRule(token: "- ", type: MarkdownLineStyle.unorderedList, removeFrom: .leading),
+                LineRule(token: "* ", type : MarkdownLineStyle.unorderedList, removeFrom: .leading),
                 LineRule(token: "\\d+\\. ",type : MarkdownLineStyle.orderedList, removeFrom: .leading, useRegex: true),
-                LineRule(token: "* ", otherTokens: ["*"], type : MarkdownLineStyle.unorderedList, removeFrom: .leading),
             ])
         }
 
@@ -587,19 +591,19 @@ extension SwiftyMarkdown {
 			self.orderedListIndentSecondOrderCount = 0
             listItem = "\(String(self.orderedListCount).suffix(2))."
             listItem = repeatElement(" ", count: 3 - listItem.count) + listItem
-		case .orderedListIndentFirstOrder, .unorderedListIndentFirstOrder:
-			self.orderedListIndentFirstOrderCount += 1
-			self.orderedListIndentSecondOrderCount = 0
-			if markdownLineStyle == .orderedListIndentFirstOrder {
-				listItem = "\(self.orderedListIndentFirstOrderCount)."
-			}
+        case .orderedListIndent:
+            self.orderedListIndentFirstOrderCount += 1
+            listItem = "\(self.orderedListIndentFirstOrderCount)."
+        case .unorderedListIndent:
+            self.orderedListIndentFirstOrderCount = 0
+            self.orderedListIndentSecondOrderCount = 0
 			
-		case .orderedListIndentSecondOrder, .unorderedListIndentSecondOrder:
+        /*case .orderedListIndentSecondOrder, .unorderedListIndentSecondOrder:
 			self.orderedListIndentSecondOrderCount += 1
 			if markdownLineStyle == .orderedListIndentSecondOrder {
 				listItem = "\(self.orderedListIndentSecondOrderCount)."
 			}
-			
+			*/
 		default:
 			self.orderedListCount = 0
 			self.orderedListIndentFirstOrderCount = 0
@@ -631,18 +635,18 @@ extension SwiftyMarkdown {
 			paragraphStyle.firstLineHeadIndent = 20.0
 			paragraphStyle.headIndent = 20.0
 			attributes[.paragraphStyle] = paragraphStyle
-		case .unorderedList, .unorderedListIndentFirstOrder, .unorderedListIndentSecondOrder, .orderedList, .orderedListIndentFirstOrder, .orderedListIndentSecondOrder:
+        case .unorderedList, .orderedList, .unorderedListIndent, .orderedListIndent:
 			
 			let interval : CGFloat = 30
 			var addition = interval
 			var indent = ""
 			switch line.lineStyle as! MarkdownLineStyle {
-			case .unorderedListIndentFirstOrder, .orderedListIndentFirstOrder:
+			case .unorderedListIndent, .orderedListIndent:
 				addition = interval * 2
-				indent = "\t"
-			case .unorderedListIndentSecondOrder, .orderedListIndentSecondOrder:
-				addition = interval * 3
-				indent = "\t\t"
+                indent = String(repeating: "\t", count: line.indent)
+                if finalTokens.first != nil {
+                    finalTokens[0].inputString = finalTokens[0].inputString.replacingOccurrences(of: "\n", with: "\n" + indent + "    ")
+                }
 			default:
 				break
 			}

@@ -26,7 +26,7 @@ public enum TokenType {
 public struct Token {
 	public let id = UUID().uuidString
 	public let type : TokenType
-	public let inputString : String
+    public var inputString : String
 	public var metadataStrings : [String] = []
 	public internal(set) var group : Int = 0
 	public internal(set) var characterStyles : [CharacterStyling] = []

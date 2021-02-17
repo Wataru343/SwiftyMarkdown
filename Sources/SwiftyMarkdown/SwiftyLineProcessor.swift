@@ -20,8 +20,11 @@ public protocol LineStyling {
 }
 
 public struct SwiftyLine : CustomStringConvertible {
-    public let line : String
-    public let lineStyle : LineStyling
+    public var line : String
+    public var prefix : String = ""
+    public var lineStyle : LineStyling
+    public var indent : Int = 0
+    public var space : Int = 0
     public var description: String {
         return self.line
     }
@@ -61,8 +64,9 @@ public struct LineRule {
     let shouldTrim : Bool
     let changeAppliesTo : ChangeApplication
     let useRegex: Bool
+    let finder: ((String) -> Range<String.Index>?)?
 
-    public init(token : String, otherTokens : [String] = [], type : LineStyling, removeFrom : Remove = .leading, shouldTrim : Bool = true, changeAppliesTo : ChangeApplication = .current, useRegex: Bool = false ) {
+    public init(token : String, otherTokens : [String] = [], type : LineStyling, removeFrom : Remove = .leading, shouldTrim : Bool = true, changeAppliesTo : ChangeApplication = .current, useRegex: Bool = false, finder: ((String) -> Range<String.Index>?)? = nil) {
         self.token = token
         self.otherTokens = otherTokens
         self.type = type
@@ -70,6 +74,7 @@ public struct LineRule {
         self.shouldTrim = shouldTrim
         self.changeAppliesTo = changeAppliesTo
         self.useRegex = useRegex
+        self.finder = finder
     }
 }
 
@@ -92,25 +97,33 @@ public class SwiftyLineProcessor {
 		self.frontMatterRules = frontMatterRules
     }
     
-    func findLeadingLineElement( _ element : LineRule, in string : String , prevStyle: SwiftyLine?) -> String? {
+    func findLeadingLineElement( _ element : LineRule, in string : String , prevLine: SwiftyLine?) -> (String?, String?) {
         var output = string
 
         var tokens = [element.token]
         tokens.append(contentsOf: element.otherTokens)
 
-        for token in tokens {
+        for token in tokens.filter({ $0.count > 0 }) {
             if element.useRegex {
                 if let range = output.range(of: "^\(token)", options: .regularExpression) {
+                    let prefix = String(output[range])
                     output.removeSubrange(range)
-                    return output
+                    return (output, prefix)
                 }
             } else if let range = output.index(output.startIndex, offsetBy: token.count, limitedBy: output.endIndex), output[output.startIndex..<range] == token {
+                let prefix = String(output[range])
                 output.removeSubrange(output.startIndex..<range)
-                return output
+                return (output, prefix)
             }
         }
 
-        return nil
+        if let range = element.finder?(output) {
+            let prefix = String(output[range])
+            output.removeSubrange(range)
+            return (output, prefix)
+        }
+
+        return (nil, nil)
     }
     
     func findTrailingLineElement( _ element : LineRule, in string : String ) -> String {
@@ -131,8 +144,12 @@ public class SwiftyLineProcessor {
         }
         return ""
     }
-    
-    func processLineLevelAttributes( _ text : String, prevStyle: SwiftyLine?) -> SwiftyLine? {
+
+    func isList(_ lineStyle: MarkdownLineStyle) -> Bool {
+        return lineStyle == .orderedList || lineStyle == .orderedListIndent || lineStyle == .unorderedList || lineStyle == .unorderedListIndent
+    }
+
+    func processLineLevelAttributes( _ text : String, prevLine: SwiftyLine?) -> SwiftyLine? {
         if text.isEmpty, let style = processEmptyStrings {
             return SwiftyLine(line: "", lineStyle: style)
         }
@@ -140,10 +157,11 @@ public class SwiftyLineProcessor {
         let previousLines = lineRules.filter({ $0.changeAppliesTo == .previous })
 
         for element in lineRules {
-            guard element.token.count > 0 else {
+            guard element.token.count > 0 || element.finder != nil else {
                 continue
             }
             var output : String? = (element.shouldTrim) ? text.trimmingCharacters(in: .whitespaces) : text
+            var prefix : String? = ""
             let unprocessed = output
 			
 			if let hasToken = self.closeToken, unprocessed != hasToken {
@@ -152,7 +170,7 @@ public class SwiftyLineProcessor {
 
             switch element.removeFrom {
             case .leading:
-                output = findLeadingLineElement(element, in: output!, prevStyle: prevStyle)
+                (output, prefix) = findLeadingLineElement(element, in: output!, prevLine: prevLine)
             /*case .trailing:
                 output = findTrailingLineElement(element, in: output!)
             case .both:
@@ -178,11 +196,31 @@ public class SwiftyLineProcessor {
 				return nil
 			}
 
-			
-			
             out = (element.shouldTrim) ? out.trimmingCharacters(in: .whitespaces) : out
-            return SwiftyLine(line: out, lineStyle: element.type)
-            
+
+            var line = SwiftyLine(line: out, lineStyle: element.type)
+            line.prefix = prefix ?? ""
+            switch element.type as! MarkdownLineStyle {
+            case .orderedListIndent, .unorderedListIndent:
+                var spaceCount = 0
+                for c in line.prefix {
+                    if c == " " {
+                        spaceCount += 1
+                    } else if c == "\t" {
+                        spaceCount += 3
+                    } else {
+                        break
+                    }
+                }
+                line.space = spaceCount
+            default:
+                if let s = prevLine?.lineStyle as? MarkdownLineStyle, isList(s) {
+                    line.lineStyle = MarkdownLineStyle.body
+                }
+                break
+            }
+
+            return line
         }
         
 		for element in previousLines {
@@ -252,23 +290,62 @@ public class SwiftyLineProcessor {
                 continue
             }
 			            
-            guard let input = processLineLevelAttributes(String(heading), prevStyle: prevStyle) else {
+            guard let input = processLineLevelAttributes(String(heading), prevLine: prevStyle) else {
 				continue
 			}
 
+            if input.line.count > 0 {
+                if let p = prevStyle?.lineStyle as? MarkdownLineStyle, let i = input.lineStyle as? MarkdownLineStyle, isList(p), i == .body {
+                    foundAttributes[foundAttributes.count - 1].line.append("\n" + input.line)
+                    continue
+                }
+            }
+
             prevStyle = input
 			
-            if let existentPrevious = input.lineStyle.styleIfFoundStyleAffectsPreviousLine(), foundAttributes.count > 0 {
+            /*if let existentPrevious = input.lineStyle.styleIfFoundStyleAffectsPreviousLine(), foundAttributes.count > 0 {
                 if let idx = foundAttributes.firstIndex(of: foundAttributes.last!) {
                     let updatedPrevious = foundAttributes.last!
                     foundAttributes[idx] = SwiftyLine(line: updatedPrevious.line, lineStyle: existentPrevious)
                 }
                 continue
-            }
+            }*/
+
+
+
             foundAttributes.append(input)
 			
 			self.perfomanceLog.tag(with: "(line completed: \(heading)")
         }
+
+        for i in 1..<foundAttributes.count - 0 {
+            switch foundAttributes[i].lineStyle as! MarkdownLineStyle {
+            case .orderedList, .orderedListIndent, .unorderedList, .unorderedListIndent:
+
+                for j in (0..<i).reversed() {
+                    if let s = (foundAttributes[j].lineStyle as? MarkdownLineStyle), isList(s) {
+                        let iSpace = foundAttributes[i].space
+                        let jSpace = foundAttributes[j].space
+                        if (jSpace + 2...jSpace + 3) ~= iSpace {
+                            foundAttributes[i].indent = foundAttributes[j].indent + 1
+                            break
+                        } else if (jSpace...jSpace + 1) ~= iSpace {
+                            foundAttributes[i].indent = foundAttributes[j].indent
+                            break
+                        }
+                    } else if foundAttributes[j].lineStyle as? MarkdownLineStyle == .body {
+                        break
+                    }
+                }
+
+                break
+
+            default:
+                break
+            }
+
+        }
+
         return foundAttributes
     }
     
