@@ -317,12 +317,17 @@ If that is not set, then the system default will be used.
                     guard let range = $0.range(of: "^\\s*\\*\\s", options: .regularExpression) else { return nil }
                     return range
                 })),
+                LineRule(token: "", type: MarkdownLineStyle.unorderedListIndent, removeFrom: .leading, shouldTrim: false , finder: ({
+                    guard let range = $0.range(of: "^\\s*\\+\\s", options: .regularExpression) else { return nil }
+                    return range
+                })),
                 LineRule(token: "", type: MarkdownLineStyle.orderedListIndent, removeFrom: .leading, shouldTrim: false , finder: ({
                     guard let range = $0.range(of: "^\\s*\\d+\\.\\s", options: .regularExpression) else { return nil }
                     return range
                 })),
                 LineRule(token: "- ", type: MarkdownLineStyle.unorderedList, removeFrom: .leading),
                 LineRule(token: "* ", type : MarkdownLineStyle.unorderedList, removeFrom: .leading),
+                LineRule(token: "+ ", type : MarkdownLineStyle.unorderedList, removeFrom: .leading),
                 LineRule(token: "\\d+\\. ",type : MarkdownLineStyle.orderedList, removeFrom: .leading, useRegex: true),
             ])
         }
