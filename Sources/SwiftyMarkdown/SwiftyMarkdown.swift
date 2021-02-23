@@ -246,7 +246,7 @@ If that is not set, then the system default will be used.
 	
 	var string : String
 
-	var orderedListCount = 0
+	var orderedListCount = [Int:Int]()
 	var orderedListIndentFirstOrderCount = 0
 	var orderedListIndentSecondOrderCount = 0
 	
@@ -591,16 +591,52 @@ extension SwiftyMarkdown {
 		var listItem = self.bullet
 		switch markdownLineStyle {
 		case .orderedList:
-			self.orderedListCount += 1
 			self.orderedListIndentFirstOrderCount = 0
 			self.orderedListIndentSecondOrderCount = 0
-            listItem = "\(String(self.orderedListCount).suffix(2))."
+            listItem = "\(String(self.orderedListIndentFirstOrderCount).suffix(2))."
             listItem = repeatElement(" ", count: 3 - listItem.count) + listItem
         case .orderedListIndent:
-            self.orderedListIndentFirstOrderCount += 1
-            listItem = "\(self.orderedListIndentFirstOrderCount)."
+            if self.orderedListCount[line.indent] == nil {
+                self.orderedListCount[line.indent] = 0
+            }
+            self.orderedListCount[line.indent]! += 1
+
+            func convertBase25(_ num: Int) -> String {
+                var input = num
+                var n = 1
+
+                let scalars = "a".unicodeScalars
+                let aval = scalars[scalars.startIndex].value - 1
+
+                var base = Int(pow(Double(26), Double(n)))
+                var p = input % base
+                var dst = ""
+                repeat {
+                    if n == 1 {
+                        dst += String(Character(Unicode.Scalar(aval + UInt32(p % 26) + 1)!))
+                    } else {
+                        dst += String(Character(Unicode.Scalar(aval + UInt32(p / 26))!))
+                    }
+                    input -= p
+                    n += 1
+                    base = Int(pow(Double(26), Double(n)))
+                    p = input % base
+                } while p > 0
+
+                return String(dst.reversed())
+            }
+
+
+            var num = ""
+            if line.indent == 1 {
+                num = convertBase25(self.orderedListCount[line.indent]! - 1)
+            } else {
+                num = String(self.orderedListCount[line.indent]!)
+            }
+            listItem = "\(num.suffix(2))."
+            listItem = repeatElement(" ", count: 3 - listItem.count) + listItem
         case .unorderedListIndent:
-            self.orderedListIndentFirstOrderCount = 0
+            //self.orderedListCount[line.indent] = 0
             self.orderedListIndentSecondOrderCount = 0
 			
         /*case .orderedListIndentSecondOrder, .unorderedListIndentSecondOrder:
@@ -610,7 +646,7 @@ extension SwiftyMarkdown {
 			}
 			*/
 		default:
-			self.orderedListCount = 0
+            self.orderedListCount.removeAll()
 			self.orderedListIndentFirstOrderCount = 0
 			self.orderedListIndentSecondOrderCount = 0
 		}

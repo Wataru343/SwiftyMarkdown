@@ -319,14 +319,22 @@ public class SwiftyLineProcessor {
         }
 
         for i in 1..<foundAttributes.count - 0 {
-            switch foundAttributes[i].lineStyle as! MarkdownLineStyle {
-            case .orderedList, .orderedListIndent, .unorderedList, .unorderedListIndent:
-
+            let lineStyle = foundAttributes[i].lineStyle as! MarkdownLineStyle
+            if isList(lineStyle) {
                 for j in (0..<i).reversed() {
-                    if let s = (foundAttributes[j].lineStyle as? MarkdownLineStyle), isList(s) {
-                        let iSpace = foundAttributes[i].space
-                        let jSpace = foundAttributes[j].space
+                    let iSpace = foundAttributes[i].space
+                    let jSpace = foundAttributes[j].space
+
+                    if lineStyle == .unorderedList || lineStyle == .unorderedListIndent {
                         if (jSpace + 2...jSpace + 3) ~= iSpace {
+                            foundAttributes[i].indent = foundAttributes[j].indent + 1
+                            break
+                        } else if (jSpace...jSpace + 1) ~= iSpace {
+                            foundAttributes[i].indent = foundAttributes[j].indent
+                            break
+                        }
+                    } else if lineStyle == .orderedList || lineStyle == .orderedListIndent {
+                        if jSpace + 3 <= iSpace {
                             foundAttributes[i].indent = foundAttributes[j].indent + 1
                             break
                         } else if (jSpace...jSpace + 1) ~= iSpace {
@@ -337,13 +345,7 @@ public class SwiftyLineProcessor {
                         break
                     }
                 }
-
-                break
-
-            default:
-                break
             }
-
         }
 
         return foundAttributes
