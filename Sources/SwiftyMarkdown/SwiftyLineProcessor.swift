@@ -171,14 +171,16 @@ public class SwiftyLineProcessor {
             switch element.removeFrom {
             case .leading:
                 (output, prefix) = findLeadingLineElement(element, in: output!, prevLine: prevLine)
-            /*case .trailing:
+            case .trailing:
                 output = findTrailingLineElement(element, in: output!)
             case .both:
-                output = findLeadingLineElement(element, in: output!, prevStyle: prevStyle)
-                output = findTrailingLineElement(element, in: output!)
+                (output, prefix) = findLeadingLineElement(element, in: output!, prevLine: prevLine)
+                if output == nil { continue }
+                let output2 = findTrailingLineElement(element, in: output!)
+                if output2.count > 0 { output = output2 }
 			case .entireLine:
 				let maybeOutput = output!.replacingOccurrences(of: element.token, with: "")
-				output = ( maybeOutput.isEmpty ) ? maybeOutput : output*/
+				output = ( maybeOutput.isEmpty ) ? maybeOutput : output
             default:
                 break
             }
