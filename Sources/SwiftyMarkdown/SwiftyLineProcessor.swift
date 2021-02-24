@@ -111,7 +111,7 @@ public class SwiftyLineProcessor {
                     return (output, prefix)
                 }
             } else if let range = output.index(output.startIndex, offsetBy: token.count, limitedBy: output.endIndex), output[output.startIndex..<range] == token {
-                let prefix = String(output[range])
+                let prefix = String(output[output.startIndex..<range])
                 output.removeSubrange(output.startIndex..<range)
                 return (output, prefix)
             }
