@@ -232,7 +232,7 @@ If that is not set, then the system default will be used.
 
 	open var strikethrough = BasicStyles()
 	
-	public var bullet : String = "・"
+	public var bullet : [String] = ["•", "◦"]
 	
 	public var underlineLinks : Bool = false
 	
@@ -588,7 +588,7 @@ extension SwiftyMarkdown {
 			preconditionFailure("The passed line style is not a valid Markdown Line Style")
 		}
 		
-		var listItem = self.bullet
+		var listItem = ""
 		switch markdownLineStyle {
 		case .orderedList:
 			self.orderedListIndentFirstOrderCount = 0
@@ -635,7 +635,8 @@ extension SwiftyMarkdown {
             }
             listItem = "\(num.suffix(2))."
             listItem = repeatElement(" ", count: 3 - listItem.count) + listItem
-        case .unorderedListIndent:
+        case .unorderedListIndent, .unorderedList:
+            listItem = line.indent == 1 ? self.bullet[1] : self.bullet[0]
             //self.orderedListCount[line.indent] = 0
             self.orderedListIndentSecondOrderCount = 0
 			
