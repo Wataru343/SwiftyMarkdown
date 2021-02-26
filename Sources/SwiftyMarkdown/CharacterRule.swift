@@ -31,7 +31,7 @@ public enum CharacterRuleTagType {
 }
 
 
-public struct CharacterRuleTag {
+public struct CharacterRuleTag: Equatable {
 	let tag : String
 	let type : CharacterRuleTagType
 	
@@ -39,9 +39,14 @@ public struct CharacterRuleTag {
 		self.tag = tag
 		self.type = type
 	}
+
+    public static func == (lhs: CharacterRuleTag, rhs: CharacterRuleTag) -> Bool {
+        return lhs.tag == rhs.tag &&
+            lhs.type == rhs.type
+    }
 }
 
-public struct CharacterRule : CustomStringConvertible {
+public struct CharacterRule : CustomStringConvertible, Equatable {
 	
 	public let primaryTag : CharacterRuleTag
 	public let tags : [CharacterRuleTag]
@@ -56,16 +61,30 @@ public struct CharacterRule : CustomStringConvertible {
 	public var definesBoundary = false
 	public var shouldCancelRemainingRules = false
 	public var balancedTags = false
-	
+    public var requiredSpace = false
+
+    public static func == (lhs: CharacterRule, rhs: CharacterRule) -> Bool {
+        return lhs.primaryTag == rhs.primaryTag &&
+            lhs.tags == rhs.tags &&
+            lhs.escapeCharacters == rhs.escapeCharacters &&
+            lhs.minTags == rhs.minTags &&
+            lhs.maxTags == rhs.maxTags &&
+            lhs.metadataLookup == rhs.metadataLookup &&
+            lhs.definesBoundary == rhs.definesBoundary &&
+            lhs.shouldCancelRemainingRules == rhs.shouldCancelRemainingRules &&
+            lhs.balancedTags == rhs.balancedTags &&
+            lhs.requiredSpace == rhs.requiredSpace
+    }
+
 	public var description: String {
 		return "Character Rule with Open tag: \(self.primaryTag.tag) and current styles : \(self.styles) "
 	}
-	
+
 	public func tag( for type : CharacterRuleTagType ) -> CharacterRuleTag? {
 		return self.tags.filter({ $0.type == type }).first ?? nil
 	}
-	
-	public init(primaryTag: CharacterRuleTag, otherTags: [CharacterRuleTag], escapeCharacters : [Character] = ["\\"], styles: [Int : CharacterStyling] = [:], minTags : Int = 1, maxTags : Int = 1, metadataLookup : Bool = false, definesBoundary : Bool = false, shouldCancelRemainingRules : Bool = false, balancedTags : Bool = false) {
+
+	public init(primaryTag: CharacterRuleTag, otherTags: [CharacterRuleTag], escapeCharacters : [Character] = ["\\"], styles: [Int : CharacterStyling] = [:], minTags : Int = 1, maxTags : Int = 1, metadataLookup : Bool = false, definesBoundary : Bool = false, shouldCancelRemainingRules : Bool = false, balancedTags : Bool = false, requiredSpace : Bool = false) {
 		self.primaryTag = primaryTag
 		self.tags = otherTags
 		self.escapeCharacters = escapeCharacters
@@ -76,6 +95,7 @@ public struct CharacterRule : CustomStringConvertible {
 		self.minTags = maxTags < minTags ? maxTags : minTags
 		self.maxTags = minTags > maxTags ? minTags : maxTags
 		self.balancedTags = balancedTags
+        self.requiredSpace = requiredSpace
 	}
 }
 

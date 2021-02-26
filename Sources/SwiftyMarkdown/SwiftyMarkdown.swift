@@ -396,19 +396,19 @@ If that is not set, then the system default will be used.
 
         if enableStrikethrough {
             characterRules.append(contentsOf: [
-                CharacterRule(primaryTag:CharacterRuleTag(tag: "~", type: .repeating), otherTags : [], styles: [1 : CharacterStyle.strikethrough], shouldCancelRemainingRules: true, balancedTags: true),
+                CharacterRule(primaryTag:CharacterRuleTag(tag: "~", type: .repeating), otherTags : [], styles: [1 : CharacterStyle.strikethrough], shouldCancelRemainingRules: true, balancedTags: true, requiredSpace: true),
             ])
         }
 
         if enableBold {
             characterRules.append(contentsOf: [
-                CharacterRule(primaryTag:CharacterRuleTag(tag: "*", type: .repeating), otherTags : [], styles: [1 : CharacterStyle.bold], shouldCancelRemainingRules: true, balancedTags: true),
+                CharacterRule(primaryTag:CharacterRuleTag(tag: "*", type: .repeating), otherTags : [], styles: [1 : CharacterStyle.bold], shouldCancelRemainingRules: true, balancedTags: true, requiredSpace: true),
             ])
         }
 
         if enableItalic {
             characterRules.append(contentsOf: [
-                CharacterRule(primaryTag:CharacterRuleTag(tag: "_", type: .repeating), otherTags : [], styles: [1 : CharacterStyle.italic], shouldCancelRemainingRules: true, balancedTags: true),
+                CharacterRule(primaryTag:CharacterRuleTag(tag: "_", type: .repeating), otherTags : [], styles: [1 : CharacterStyle.italic], shouldCancelRemainingRules: true, balancedTags: true, requiredSpace: true),
             ])
         }
 

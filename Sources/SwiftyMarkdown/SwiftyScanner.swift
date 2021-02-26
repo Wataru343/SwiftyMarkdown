@@ -45,7 +45,7 @@ class SwiftyScanner {
 	var tagGroups : [TagGroup] = []
 	
 	var isMetadataOpen = false
-	
+    var openTagStack : [(rule: CharacterRule, legal: Bool)] = [] //Rule, Legal
 	
 	var enableLog = (ProcessInfo.processInfo.environment["SwiftyScannerScanner"] != nil)
 	
@@ -130,7 +130,7 @@ class SwiftyScanner {
 		return isEscaped
 	}
 	
-	func range( for tag : String? ) -> ClosedRange<Int>? {
+    func range( for tag : String?, rule : CharacterRule? = nil ) -> ClosedRange<Int>? {
 
 		guard let tag = tag else {
 			return nil
@@ -151,7 +151,21 @@ class SwiftyScanner {
 		if isEscaped() {
 			return nil
 		}
-		
+
+
+        if let r = rule {
+            if let lastRule = self.openTagStack.popLast(), lastRule.rule == r {
+                if !lastRule.legal {
+                    return nil
+                }
+            } else if r.requiredSpace && 1..<self.elements.count ~= self.pointer && !self.elements[self.pointer - 1].character.isWhitespace {
+                self.openTagStack.append((r, false))
+                return nil
+            } else {
+                self.openTagStack.append((r, true))
+            }
+        }
+
 		let range : ClosedRange<Int>
 		if tag.count > 1 {
 			guard let elements = self.elementsBetweenCurrentPosition(and: .forward(tag.count - 1) ) else {
@@ -446,7 +460,7 @@ class SwiftyScanner {
 				os_log("CHARACTER: %@", log: OSLog.swiftyScanner, type:.info , String(self.elements[self.pointer].character))
 			}
 			
-			if var openRange = self.range(for: self.rule.primaryTag.tag) {
+            if var openRange = self.range(for: self.rule.primaryTag.tag, rule: self.rule) {
 				
 				if self.elements[openRange].first?.boundaryCount == 1000 {
 					self.resetTag(in: openRange)
@@ -504,6 +518,18 @@ class SwiftyScanner {
 				if let idx = tagGroups.firstIndex(where: { $0.groupID == groupID }) {
 					if tagType == .either {
 						if tagGroups[idx].count == count {
+                            if openRange.lowerBound < self.elements.count - 1 {
+                                if !self.elements[openRange.upperBound.advanced(by: 1)].character.isWhitespace {
+                                    for range in [self.tagGroups[idx].tagRanges[0], openRange] {
+                                        for i in range {
+                                            self.elements[i].type = .string
+                                        }
+                                    }
+
+                                    self.tagGroups.remove(at: idx)
+                                    continue
+                                }
+                            }
 							self.tagGroups[idx].tagRanges.append(openRange)
 							self.closeTag(self.rule.primaryTag.tag, withGroupID: groupID)
 							
